@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ペパコミ株式会社 - kintone活用チャンネル</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background-animation">
+        <div class="floating-particle"></div>
+        <div class="floating-particle"></div>
+        <div class="floating-particle"></div>
+        <div class="floating-particle"></div>
+        <div class="floating-particle"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <span class="logo-text">PEPACOMI</span>
+                <span class="logo-subtitle">kintone活用</span>
+            </div>
+            <div class="nav-links">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="hero-title-main">kintone活用チャンネル</span>
+                <span class="hero-title-sub">ビジネス革新への扉</span>
+            </h1>
+            <p class="hero-description">
+                ペパコミ株式会社が提供する最先端のkintone活用術。
+                <br>あなたのビジネスを次世代へ導く革新的なソリューションを発見しよう。
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="subscribeChannel()">
+                    <span>チャンネル登録</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <button class="btn btn-secondary" onclick="scrollToSection('about')">
+                    <span>詳細を見る</span>
+                </button>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="floating-orb orb-1"></div>
+            <div class="floating-orb orb-2"></div>
+            <div class="floating-orb orb-3"></div>
+            <div class="hologram-container">
+                <div class="hologram-ring ring-1"></div>
+                <div class="hologram-ring ring-2"></div>
+                <div class="hologram-ring ring-3"></div>
+                <div class="central-logo">kintone</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-highlight">革新的な</span>kintone活用術
+            </h2>
+            <div class="about-grid">
+                <div class="about-card card-1">
+                    <div class="card-icon">🚀</div>
+                    <h3>業務効率化</h3>
+                    <p>kintoneを活用した革新的な業務プロセスの最適化手法を学べます</p>
+                </div>
+                <div class="about-card card-2">
+                    <div class="card-icon">⚡</div>
+                    <h3>最新技術</h3>
+                    <p>最新のkintone機能とAPI活用による高度なカスタマイズ技術</p>
+                </div>
+                <div class="about-card card-3">
+                    <div class="card-icon">🎯</div>
+                    <h3>実践的ノウハウ</h3>
+                    <p>実際のビジネスシーンで活用できる実践的なノウハウとベストプラクティス</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">チャンネルの特徴</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-number">01</div>
+                    <h3>専門的な解説</h3>
+                    <p>kintoneのエキスパートによる深い洞察と実践的なアドバイス</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">02</div>
+                    <h3>定期的な更新</h3>
+                    <p>新機能やアップデートに対応した最新情報を定期的に配信</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">03</div>
+                    <h3>コミュニティ</h3>
+                    <p>視聴者同士が知識を共有し、共に成長できるコミュニティ</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-number">04</div>
+                    <h3>実例中心</h3>
+                    <p>理論だけでなく、実際の導入事例を基にした具体的な解説</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">お問い合わせ</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>さらに詳しい情報をお求めの方</h3>
+                    <p>
+                        kintone活用に関するご相談やカスタムソリューションについて、
+                        お気軽にお問い合わせください。専門チームがサポートいたします。
+                    </p>
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <span>info@pepacomi.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">🌐</span>
+                            <span>www.pepacomi.com</span>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="company">会社名</label>
+                        <input type="text" id="company" name="company" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">お名前</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">メールアドレス</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">メッセージ</label>
+                        <textarea id="message" name="message" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary form-submit">
+                        <span>送信する</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-text">PEPACOMI</span>
+                    <span class="logo-subtitle">kintone活用チャンネル</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">プライバシーポリシー</a>
+                    <a href="#" class="footer-link">利用規約</a>
+                    <a href="#contact" class="footer-link">お問い合わせ</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link" title="YouTube">📺</a>
+                    <a href="#" class="social-link" title="Twitter">🐦</a>
+                    <a href="#" class="social-link" title="LinkedIn">💼</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ペパコミ株式会社. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
