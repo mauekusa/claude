@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートホスピタル - 統合患者ケア管理システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .hospital-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #00b894;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .patient-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .search-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00b894;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .patient-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .patient-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .patient-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .patient-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .patient-details {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .patient-condition {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .patient-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-stable {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-monitoring {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-critical {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .vital-signs {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .patient-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+            color: white;
+        }
+
+        .schedule-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .schedule-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .time-slot {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00b894;
+        }
+
+        .appointment-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .appointment-details {
+            margin-bottom: 10px;
+        }
+
+        .patient-name-small {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .doctor-name {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .treatment-type {
+            background: #e8f5e8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .emergency-alerts {
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #e74c3c;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .medical-charts {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .control-panel {
+            padding: 30px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e17055, #e74c3c);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #00b894;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #00b894;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .hospital-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .patient-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .patient-status {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 スマートホスピタル</h1>
+            <div class="subtitle">統合患者ケア管理システム</div>
+        </div>
+
+        <div class="hospital-stats">
+            <div class="stat-card">
+                <div class="stat-value">247</div>
+                <div class="stat-label">入院患者数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">89</div>
+                <div class="stat-label">本日の予約</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">緊急患者</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">96.8%</div>
+                <div class="stat-label">病床稼働率</div>
+            </div>
+        </div>
+
+        <div class="patient-section">
+            <h2 class="section-title">👥 患者管理</h2>
+            
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="患者名、患者ID、診療科で検索...">
+                <select class="filter-select">
+                    <option>診療科選択</option>
+                    <option>内科</option>
+                    <option>外科</option>
+                    <option>小児科</option>
+                    <option>整形外科</option>
+                    <option>循環器科</option>
+                </select>
+                <select class="filter-select">
+                    <option>状態フィルター</option>
+                    <option>安定</option>
+                    <option>要監視</option>
+                    <option>重篤</option>
+                </select>
+            </div>
+
+            <div class="patient-list">
+                <div class="patient-card">
+                    <div class="patient-info">
+                        <div class="patient-name">田中 太郎（65歳）</div>
+                        <div class="patient-details">
+                            患者ID: P-2024-001 | 入院日: 2024/12/01<br>
+                            診療科: 循環器内科 | 主治医: 佐藤医師
+                        </div>
+                        <div class="patient-condition">高血圧症・心筋梗塞</div>
+                    </div>
+                    <div class="patient-status">
+                        <span class="status-badge status-stable">安定</span>
+                        <div class="vital-signs">
+                            血圧: 128/82<br>
+                            脈拍: 72 bpm
+                        </div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn-small btn-primary" onclick="viewPatient('P-2024-001')">詳細</button>
+                        <button class="btn-small btn-success" onclick="updateVitals('P-2024-001')">バイタル</button>
+                        <button class="btn-small btn-warning" onclick="addNote('P-2024-001')">記録</button>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <div class="patient-info">
+                        <div class="patient-name">山田 花子（42歳）</div>
+                        <div class="patient-details">
+                            患者ID: P-2024-002 | 入院日: 2024/12/02<br>
+                            診療科: 外科 | 主治医: 鈴木医師
+                        </div>
+                        <div class="patient-condition">急性虫垂炎・術後</div>
+                    </div>
+                    <div class="patient-status">
+                        <span class="status-badge status-monitoring">要監視</span>
+                        <div class="vital-signs">
+                            体温: 37.2°C<br>
+                            脈拍: 88 bpm
+                        </div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn-small btn-primary" onclick="viewPatient('P-2024-002')">詳細</button>
+                        <button class="btn-small btn-success" onclick="updateVitals('P-2024-002')">バイタル</button>
+                        <button class="btn-small btn-warning" onclick="addNote('P-2024-002')">記録</button>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <div class="patient-info">
+                        <div class="patient-name">佐々木 一郎（78歳）</div>
+                        <div class="patient-details">
+                            患者ID: P-2024-003 | 入院日: 2024/12/03<br>
+                            診療科: 脳神経外科 | 主治医: 高橋医師
+                        </div>
+                        <div class="patient-condition">脳梗塞・急性期</div>
+                    </div>
+                    <div class="patient-status">
+                        <span class="status-badge status-critical">重篤</span>
+                        <div class="vital-signs">
+                            血圧: 180/110<br>
+                            意識レベル: JCS-1
+                        </div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn-small btn-primary" onclick="viewPatient('P-2024-003')">詳細</button>
+                        <button class="btn-small btn-success" onclick="updateVitals('P-2024-003')">バイタル</button>
+                        <button class="btn-small btn-warning" onclick="addNote('P-2024-003')">記録</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="schedule-section">
+            <h2 class="section-title">📅 本日の診療スケジュール</h2>
+            
+            <div class="schedule-grid">
+                <div class="schedule-card">
+                    <div class="schedule-header">
+                        <div class="time-slot">09:00</div>
+                        <span class="appointment-status status-stable">予約済み</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="patient-name-small">田中 太郎</div>
+                        <div class="doctor-name">循環器内科 - 佐藤医師</div>
+                        <div class="treatment-type">定期検診</div>
+                    </div>
+                </div>
+
+                <div class="schedule-card">
+                    <div class="schedule-header">
+                        <div class="time-slot">10:30</div>
+                        <span class="appointment-status status-monitoring">進行中</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="patient-name-small">山田 花子</div>
+                        <div class="doctor-name">外科 - 鈴木医師</div>
+                        <div class="treatment-type">術後診察</div>
+                    </div>
+                </div>
+
+                <div class="schedule-card">
+                    <div class="schedule-header">
+                        <div class="time-slot">14:00</div>
+                        <span class="appointment-status status-stable">予約済み</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="patient-name-small">佐々木 一郎</div>
+                        <div class="doctor-name">脳神経外科 - 高橋医師</div>
+                        <div class="treatment-type">画像診断</div>
+                    </div>
+                </div>
+
+                <div class="schedule-card">
+                    <div class="schedule-header">
+                        <div class="time-slot">15:30</div>
+                        <span class="appointment-status status-stable">予約済み</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="patient-name-small">新患 - 木村 次郎</div>
+                        <div class="doctor-name">内科 - 田村医師</div>
+                        <div class="treatment-type">初診</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="emergency-alerts">
+            <h2 class="section-title">🚨 緊急アラート・通知</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">🚨</div>
+                <div class="alert-content">
+                    <div class="alert-title">重篤患者アラート</div>
+                    <div>佐々木 一郎様の血圧が危険域に達しています。緊急対応が必要です。</div>
+                    <div class="alert-time">2分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">💊</div>
+                <div class="alert-content">
+                    <div class="alert-title">投薬時間通知</div>
+                    <div>田中 太郎様の降圧剤投与時間です。</div>
+                    <div class="alert-time">5分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">📋</div>
+                <div class="alert-content">
+                    <div class="alert-title">検査結果準備完了</div>
+                    <div>山田 花子様の血液検査結果が準備できました。</div>
+                    <div class="alert-time">15分前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="medical-charts">
+            <h2 class="section-title">📊 医療データ分析</h2>
+            <div class="chart-container">
+                <h3>📈 患者バイタルサイン推移</h3>
+                <p>リアルタイム生体情報モニタリング</p>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">🎛️ 医療管制センター</h2>
+            
+            <div class="message-box">
+                <h3>📱 医療スタッフ連絡</h3>
+                <textarea class="message-input" placeholder="患者ケアに関する連絡事項を入力してください..."></textarea>
+                <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="patientRounds()">🏥 回診管理</button>
+                <button class="btn" onclick="bedManagement()">🛏️ 病床管理</button>
+                <button class="btn" onclick="medicalRecords()">📋 カルテ管理</button>
+                <button class="btn btn-danger" onclick="emergencyCall()">🚨 緊急コール</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを医療スタッフに送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function viewPatient(patientId) {
+            alert(`患者 ${patientId} の詳細カルテを表示します。`);
+        }
+
+        function updateVitals(patientId) {
+            alert(`患者 ${patientId} のバイタルサインを更新します。`);
+        }
+
+        function addNote(patientId) {
+            const note = prompt(`患者 ${patientId} の医療記録を入力してください:`);
+            if (note) {
+                alert(`患者 ${patientId} に医療記録を追加しました: ${note}`);
+            }
+        }
+
+        function patientRounds() {
+            alert('回診スケジュールを管理します。医師の回診ルートを最適化します。');
+        }
+
+        function bedManagement() {
+            alert('病床管理画面を開きます。空床状況と入退院予定を確認できます。');
+        }
+
+        function medicalRecords() {
+            alert('電子カルテシステムにアクセスします。');
+        }
+
+        function emergencyCall() {
+            if (confirm('緊急事態ですか？医療スタッフに緊急コールを送信しますか？')) {
+                alert('緊急コールを全医療スタッフに送信しました。対応チームが向かいます。');
+            }
+        }
+
+        // リアルタイム患者状況更新のシミュレーション
+        function updatePatientStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            // 緊急患者数をランダムに変動
+            statValues[2].textContent = Math.floor(Math.random() * 5) + 10;
+        }
+
+        // 1分ごとに患者統計を更新
+        setInterval(updatePatientStats, 60000);
+
+        // バイタルサインの定期更新シミュレーション
+        function updateVitalSigns() {
+            const vitalElements = document.querySelectorAll('.vital-signs');
+            vitalElements.forEach(element => {
+                if (element.textContent.includes('血圧')) {
+                    const systolic = Math.floor(Math.random() * 20) + 120;
+                    const diastolic = Math.floor(Math.random() * 15) + 75;
+                    const pulse = Math.floor(Math.random() * 20) + 65;
+                    element.innerHTML = `血圧: ${systolic}/${diastolic}<br>脈拍: ${pulse} bpm`;
+                }
+            });
+        }
+
+        // 5分ごとにバイタルサインを更新
+        setInterval(updateVitalSigns, 300000);
+    </script>
+</body>
+</html>

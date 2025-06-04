@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートラーニング - AI個別最適化教育システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .learning-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #6c5ce7;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .student-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .class-selector {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .selector-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .class-select {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .subject-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .subject-btn {
+            padding: 8px 16px;
+            border: 2px solid #6c5ce7;
+            background: white;
+            color: #6c5ce7;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .subject-btn.active {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .student-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .student-id {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .achievement-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .badge-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-needs-help {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .progress-section {
+            margin-bottom: 15px;
+        }
+
+        .subject-progress {
+            margin-bottom: 10px;
+        }
+
+        .subject-name {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .progress-math {
+            background: linear-gradient(90deg, #fd79a8, #e84393);
+        }
+
+        .progress-science {
+            background: linear-gradient(90deg, #00b894, #00cec9);
+        }
+
+        .progress-english {
+            background: linear-gradient(90deg, #fdcb6e, #f39c12);
+        }
+
+        .progress-social {
+            background: linear-gradient(90deg, #74b9ff, #0984e3);
+        }
+
+        .recent-activity {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .activity-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .activity-item {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .activity-item::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #6c5ce7;
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+            color: white;
+        }
+
+        .ai-insights {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid #6c5ce7;
+        }
+
+        .insight-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insight-content {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .recommendation {
+            background: #e8f4ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .classroom-analytics {
+            padding: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+        }
+
+        .assignment-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .assignment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .assignment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .assignment-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .due-date {
+            font-size: 0.9rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .submission-stats {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .control-panel {
+            padding: 30px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #6c5ce7;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .learning-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .class-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .subject-filter {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .student-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .assignment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 スマートラーニング</h1>
+            <div class="subtitle">AI個別最適化教育システム</div>
+        </div>
+
+        <div class="learning-stats">
+            <div class="stat-card">
+                <div class="stat-value">248</div>
+                <div class="stat-label">総生徒数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">87.5%</div>
+                <div class="stat-label">平均理解度</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">156</div>
+                <div class="stat-label">今日の学習時間</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">23</div>
+                <div class="stat-label">要支援生徒</div>
+            </div>
+        </div>
+
+        <div class="student-section">
+            <h2 class="section-title">👨‍🎓 生徒学習状況</h2>
+            
+            <div class="class-selector">
+                <span class="selector-label">クラス選択:</span>
+                <select class="class-select">
+                    <option>3年A組</option>
+                    <option>3年B組</option>
+                    <option>2年A組</option>
+                    <option>2年B組</option>
+                    <option>1年A組</option>
+                </select>
+                <div class="subject-filter">
+                    <button class="subject-btn active" onclick="filterSubject('all')">全科目</button>
+                    <button class="subject-btn" onclick="filterSubject('math')">数学</button>
+                    <button class="subject-btn" onclick="filterSubject('science')">理科</button>
+                    <button class="subject-btn" onclick="filterSubject('english')">英語</button>
+                    <button class="subject-btn" onclick="filterSubject('social')">社会</button>
+                </div>
+            </div>
+
+            <div class="student-grid">
+                <div class="student-card">
+                    <div class="student-header">
+                        <div>
+                            <div class="student-name">田中 太郎</div>
+                            <div class="student-id">生徒ID: S-2024-001</div>
+                        </div>
+                        <span class="achievement-badge badge-excellent">優秀</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="subject-progress">
+                            <div class="subject-name">数学</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-math" style="width: 92%;">92%</div>
+                            </div>
+                        </div>
+                        <div class="subject-progress">
+                            <div class="subject-name">理科</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-science" style="width: 88%;">88%</div>
+                            </div>
+                        </div>
+                        <div class="subject-progress">
+                            <div class="subject-name">英語</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-english" style="width: 85%;">85%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <div class="activity-title">最近の学習活動</div>
+                        <div class="activity-item">数学: 二次関数の演習完了 (98点)</div>
+                        <div class="activity-item">理科: 化学実験レポート提出</div>
+                        <div class="activity-item">英語: 単語テスト (95点)</div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small btn-primary" onclick="viewProgress('S-2024-001')">詳細</button>
+                        <button class="btn-small btn-success" onclick="assignWork('S-2024-001')">課題配信</button>
+                        <button class="btn-small btn-warning" onclick="sendFeedback('S-2024-001')">フィードバック</button>
+                    </div>
+                </div>
+
+                <div class="student-card">
+                    <div class="student-header">
+                        <div>
+                            <div class="student-name">山田 花子</div>
+                            <div class="student-id">生徒ID: S-2024-002</div>
+                        </div>
+                        <span class="achievement-badge badge-good">良好</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="subject-progress">
+                            <div class="subject-name">数学</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-math" style="width: 76%;">76%</div>
+                            </div>
+                        </div>
+                        <div class="subject-progress">
+                            <div class="subject-name">理科</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-science" style="width: 82%;">82%</div>
+                            </div>
+                        </div>
+                        <div class="subject-progress">
+                            <div class="subject-name">英語</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-english" style="width: 79%;">79%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <div class="activity-title">最近の学習活動</div>
+                        <div class="activity-item">数学: 一次関数の復習中</div>
+                        <div class="activity-item">理科: 生物実験の準備</div>
+                        <div class="activity-item">英語: 文法演習 (84点)</div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small btn-primary" onclick="viewProgress('S-2024-002')">詳細</button>
+                        <button class="btn-small btn-success" onclick="assignWork('S-2024-002')">課題配信</button>
+                        <button class="btn-small btn-warning" onclick="sendFeedback('S-2024-002')">フィードバック</button>
+                    </div>
+                </div>
+
+                <div class="student-card">
+                    <div class="student-header">
+                        <div>
+                            <div class="student-name">佐藤 次郎</div>
+                            <div class="student-id">生徒ID: S-2024-003</div>
+                        </div>
+                        <span class="achievement-badge badge-needs-help">要支援</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="subject-progress">
+                            <div class="subject-name">数学</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-math" style="width: 54%;">54%</div>
+                            </div>
+                        </div>
+                        <div class="subject-progress">
+                            <div class="subject-name">理科</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-science" style="width: 62%;">62%</div>
+                            </div>
+                        </div>
+                        <div class="subject-progress">
+                            <div class="subject-name">英語</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-english" style="width: 48%;">48%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <div class="activity-title">最近の学習活動</div>
+                        <div class="activity-item">数学: 基礎計算の復習中</div>
+                        <div class="activity-item">理科: 実験観察の補助教材視聴</div>
+                        <div class="activity-item">英語: 基本文法の個別指導予定</div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small btn-primary" onclick="viewProgress('S-2024-003')">詳細</button>
+                        <button class="btn-small btn-success" onclick="assignWork('S-2024-003')">課題配信</button>
+                        <button class="btn-small btn-warning" onclick="sendFeedback('S-2024-003')">フィードバック</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-insights">
+            <h2 class="section-title">🤖 AI学習分析</h2>
+            
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>📊</span>
+                    クラス全体の学習傾向
+                </div>
+                <div class="insight-content">
+                    3年A組では数学の二次関数分野で躓く生徒が多く見られます。視覚的な教材を活用した説明が効果的です。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> グラフ描画ツールを使った個別演習を実施してください。
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>🎯</span>
+                    個別支援提案
+                </div>
+                <div class="insight-content">
+                    佐藤次郎くんは基礎計算に時間をかけすぎる傾向があります。計算の自動化訓練が必要です。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 10分間の基礎計算ドリルを毎日実施することを推奨します。
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>⭐</span>
+                    優秀生徒への発展的学習
+                </div>
+                <div class="insight-content">
+                    田中太郎くんは標準カリキュラムを上回る理解度を示しています。発展的な課題が適しています。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 高校レベルの発展問題や探究活動を提案してください。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="classroom-analytics">
+            <h2 class="section-title">📈 学習分析</h2>
+            <div class="chart-container">
+                <h3>📊 クラス別学習進捗</h3>
+                <p>リアルタイム学習データとAI分析結果</p>
+            </div>
+        </div>
+
+        <div class="assignment-section">
+            <h2 class="section-title">📝 課題管理</h2>
+            
+            <div class="assignment-grid">
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title">数学: 二次関数の応用</div>
+                        <div class="due-date">期限: 12/10</div>
+                    </div>
+                    <div class="submission-stats">
+                        <div class="stat-row">
+                            <span>提出率:</span>
+                            <span><strong>24/30 (80%)</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span>平均点:</span>
+                            <span><strong>78.5点</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span>未提出:</span>
+                            <span><strong>6名</strong></span>
+                        </div>
+                    </div>
+                    <button class="btn-small btn-primary" onclick="viewAssignment('A-001')">詳細確認</button>
+                </div>
+
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title">理科: 化学実験レポート</div>
+                        <div class="due-date">期限: 12/12</div>
+                    </div>
+                    <div class="submission-stats">
+                        <div class="stat-row">
+                            <span>提出率:</span>
+                            <span><strong>18/30 (60%)</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span>平均点:</span>
+                            <span><strong>82.1点</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span>未提出:</span>
+                            <span><strong>12名</strong></span>
+                        </div>
+                    </div>
+                    <button class="btn-small btn-primary" onclick="viewAssignment('A-002')">詳細確認</button>
+                </div>
+
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title">英語: 長文読解練習</div>
+                        <div class="due-date">期限: 12/15</div>
+                    </div>
+                    <div class="submission-stats">
+                        <div class="stat-row">
+                            <span>提出率:</span>
+                            <span><strong>30/30 (100%)</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span>平均点:</span>
+                            <span><strong>75.8点</strong></span>
+                        </div>
+                        <div class="stat-row">
+                            <span>未提出:</span>
+                            <span><strong>0名</strong></span>
+                        </div>
+                    </div>
+                    <button class="btn-small btn-success" onclick="viewAssignment('A-003')">詳細確認</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">🎛️ 教育管理センター</h2>
+            
+            <div class="message-box">
+                <h3>📱 教育関係者連絡</h3>
+                <textarea class="message-input" placeholder="学習指導や生徒の状況に関する連絡事項を入力してください..."></textarea>
+                <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="createAssignment()">📝 課題作成</button>
+                <button class="btn" onclick="scheduleClass()">📅 授業スケジュール</button>
+                <button class="btn" onclick="generateReport()">📊 学習レポート</button>
+                <button class="btn" onclick="parentCommunication()">👨‍👩‍👧‍👦 保護者連絡</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを教育関係者に送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function filterSubject(subject) {
+            const buttons = document.querySelectorAll('.subject-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            alert(`${subject === 'all' ? '全科目' : subject}でフィルタリングしました。`);
+        }
+
+        function viewProgress(studentId) {
+            alert(`生徒 ${studentId} の詳細な学習進捗を表示します。`);
+        }
+
+        function assignWork(studentId) {
+            alert(`生徒 ${studentId} に個別最適化された課題を配信します。`);
+        }
+
+        function sendFeedback(studentId) {
+            const feedback = prompt(`生徒 ${studentId} へのフィードバックを入力してください:`);
+            if (feedback) {
+                alert(`生徒 ${studentId} にフィードバックを送信しました: ${feedback}`);
+            }
+        }
+
+        function viewAssignment(assignmentId) {
+            alert(`課題 ${assignmentId} の詳細と提出状況を表示します。`);
+        }
+
+        function createAssignment() {
+            alert('AI支援による課題作成ツールを開きます。生徒の理解度に応じた課題を自動生成します。');
+        }
+
+        function scheduleClass() {
+            alert('授業スケジュール管理画面を開きます。');
+        }
+
+        function generateReport() {
+            alert('学習進捗レポートを生成します。保護者向けと教師向けの両方を作成します。');
+        }
+
+        function parentCommunication() {
+            alert('保護者連絡システムを開きます。生徒の学習状況を共有できます。');
+        }
+
+        // 学習進捗のリアルタイム更新シミュレーション
+        function updateLearningStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            // 平均理解度をリアルタイム更新
+            const currentUnderstanding = parseFloat(statValues[1].textContent);
+            const variation = (Math.random() - 0.5) * 2;
+            const newUnderstanding = Math.max(70, Math.min(100, currentUnderstanding + variation));
+            statValues[1].textContent = newUnderstanding.toFixed(1) + '%';
+        }
+
+        // 進捗バーのアニメーション
+        window.addEventListener('load', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        });
+
+        // 5分ごとに学習統計を更新
+        setInterval(updateLearningStats, 300000);
+    </script>
+</body>
+</html>

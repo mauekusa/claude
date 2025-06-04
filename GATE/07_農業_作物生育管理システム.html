@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートアグリ - IoT連携精密農業管理システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .farm-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #27ae60;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .field-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .field-selector {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .selector-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .field-select {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .crop-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .crop-btn {
+            padding: 8px 16px;
+            border: 2px solid #27ae60;
+            background: white;
+            color: #27ae60;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .crop-btn.active {
+            background: #27ae60;
+            color: white;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .field-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .field-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .field-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .field-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-healthy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-attention {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .crop-info {
+            margin-bottom: 15px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .environmental-data {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .env-metric {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .env-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .env-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .growth-progress {
+            margin-bottom: 15px;
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .field-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+            color: white;
+        }
+
+        .iot-monitoring {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .sensor-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .sensor-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .sensor-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 5px;
+        }
+
+        .sensor-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .sensor-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .weather-section {
+            padding: 30px;
+        }
+
+        .weather-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .weather-current {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+        }
+
+        .temperature {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .weather-condition {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .weather-metric {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .weather-forecast {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .forecast-day {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .forecast-date {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .forecast-icon {
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+
+        .forecast-temp {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .ai-insights {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid #27ae60;
+        }
+
+        .insight-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insight-content {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .recommendation {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .alerts-section {
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #f39c12;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #27ae60;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #27ae60;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .farm-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .field-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .crop-filter {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .field-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .environmental-data {
+                grid-template-columns: 1fr;
+            }
+
+            .field-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-current {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .weather-forecast {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 スマートアグリ</h1>
+            <div class="subtitle">IoT連携精密農業管理システム</div>
+        </div>
+
+        <div class="farm-stats">
+            <div class="stat-card">
+                <div class="stat-value">15.2ha</div>
+                <div class="stat-label">総作付面積</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">作物品種</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">47</div>
+                <div class="stat-label">IoTセンサー</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">94.2%</div>
+                <div class="stat-label">作物健康度</div>
+            </div>
+        </div>
+
+        <div class="field-section">
+            <h2 class="section-title">🏞️ 圃場管理</h2>
+            
+            <div class="field-selector">
+                <span class="selector-label">圃場選択:</span>
+                <select class="field-select">
+                    <option>A圃場 (5.2ha)</option>
+                    <option>B圃場 (3.8ha)</option>
+                    <option>C圃場 (4.1ha)</option>
+                    <option>D圃場 (2.1ha)</option>
+                </select>
+                <div class="crop-filter">
+                    <button class="crop-btn active" onclick="filterCrop('all')">全作物</button>
+                    <button class="crop-btn" onclick="filterCrop('rice')">水稲</button>
+                    <button class="crop-btn" onclick="filterCrop('vegetable')">野菜</button>
+                    <button class="crop-btn" onclick="filterCrop('fruit')">果実</button>
+                </div>
+            </div>
+
+            <div class="field-grid">
+                <div class="field-card">
+                    <div class="field-header">
+                        <div class="field-name">A-1圃場（水稲）</div>
+                        <span class="field-status status-healthy">健全</span>
+                    </div>
+                    <div class="crop-info">
+                        品種: コシヒカリ | 作付面積: 2.1ha<br>
+                        播種日: 4月15日 | 生育期: 出穂期
+                    </div>
+                    <div class="environmental-data">
+                        <div class="env-metric">
+                            <div class="env-value">25.3°C</div>
+                            <div class="env-label">気温</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">65%</div>
+                            <div class="env-label">湿度</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">7.2cm</div>
+                            <div class="env-label">水位</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">6.8pH</div>
+                            <div class="env-label">土壌酸度</div>
+                        </div>
+                    </div>
+                    <div class="growth-progress">
+                        <div class="progress-label">生育進捗（出穂期）</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 78%;">78%</div>
+                        </div>
+                    </div>
+                    <div class="field-actions">
+                        <button class="btn-small btn-primary" onclick="viewField('A-1')">詳細</button>
+                        <button class="btn-small btn-info" onclick="waterControl('A-1')">水管理</button>
+                        <button class="btn-small btn-warning" onclick="addTask('A-1')">作業</button>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-header">
+                        <div class="field-name">B-2圃場（トマト）</div>
+                        <span class="field-status status-warning">要注意</span>
+                    </div>
+                    <div class="crop-info">
+                        品種: 桃太郎 | 作付面積: 0.8ha<br>
+                        定植日: 5月20日 | 生育期: 開花期
+                    </div>
+                    <div class="environmental-data">
+                        <div class="env-metric">
+                            <div class="env-value">28.7°C</div>
+                            <div class="env-label">気温</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">58%</div>
+                            <div class="env-label">湿度</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">32%</div>
+                            <div class="env-label">土壌水分</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">6.2pH</div>
+                            <div class="env-label">土壌酸度</div>
+                        </div>
+                    </div>
+                    <div class="growth-progress">
+                        <div class="progress-label">生育進捗（開花期）</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%;">65%</div>
+                        </div>
+                    </div>
+                    <div class="field-actions">
+                        <button class="btn-small btn-primary" onclick="viewField('B-2')">詳細</button>
+                        <button class="btn-small btn-info" onclick="waterControl('B-2')">灌水</button>
+                        <button class="btn-small btn-warning" onclick="addTask('B-2')">作業</button>
+                    </div>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-header">
+                        <div class="field-name">C-3圃場（リンゴ）</div>
+                        <span class="field-status status-healthy">健全</span>
+                    </div>
+                    <div class="crop-info">
+                        品種: ふじ | 作付面積: 1.5ha<br>
+                        植栽年: 2018年 | 生育期: 果実肥大期
+                    </div>
+                    <div class="environmental-data">
+                        <div class="env-metric">
+                            <div class="env-value">24.1°C</div>
+                            <div class="env-label">気温</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">72%</div>
+                            <div class="env-label">湿度</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">45%</div>
+                            <div class="env-label">土壌水分</div>
+                        </div>
+                        <div class="env-metric">
+                            <div class="env-value">6.5pH</div>
+                            <div class="env-label">土壌酸度</div>
+                        </div>
+                    </div>
+                    <div class="growth-progress">
+                        <div class="progress-label">生育進捗（肥大期）</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 82%;">82%</div>
+                        </div>
+                    </div>
+                    <div class="field-actions">
+                        <button class="btn-small btn-primary" onclick="viewField('C-3')">詳細</button>
+                        <button class="btn-small btn-info" onclick="waterControl('C-3')">灌水</button>
+                        <button class="btn-small btn-warning" onclick="addTask('C-3')">作業</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="iot-monitoring">
+            <h2 class="section-title">📡 IoT環境モニタリング</h2>
+            
+            <div class="sensor-grid">
+                <div class="sensor-card">
+                    <div class="sensor-icon">🌡️</div>
+                    <div class="sensor-value">25.3°C</div>
+                    <div class="sensor-label">平均気温</div>
+                    <span class="sensor-status status-healthy">正常</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">💧</div>
+                    <div class="sensor-value">45%</div>
+                    <div class="sensor-label">土壌水分</div>
+                    <span class="sensor-status status-warning">要注意</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">🌱</div>
+                    <div class="sensor-value">6.7pH</div>
+                    <div class="sensor-label">土壌酸度</div>
+                    <span class="sensor-status status-healthy">正常</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">☀️</div>
+                    <div class="sensor-value">8.2h</div>
+                    <div class="sensor-label">日照時間</div>
+                    <span class="sensor-status status-healthy">良好</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">💨</div>
+                    <div class="sensor-value">2.1m/s</div>
+                    <div class="sensor-label">風速</div>
+                    <span class="sensor-status status-healthy">正常</span>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">📊</div>
+                    <div class="sensor-value">350ppm</div>
+                    <div class="sensor-label">土壌EC</div>
+                    <span class="sensor-status status-healthy">適正</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="weather-section">
+            <h2 class="section-title">🌤️ 気象情報</h2>
+            
+            <div class="weather-card">
+                <div class="weather-current">
+                    <div class="weather-main">
+                        <div class="weather-icon">⛅</div>
+                        <div>
+                            <div class="temperature">25°C</div>
+                            <div class="weather-condition">曇り時々晴れ</div>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-metric">
+                            <div class="env-value">65%</div>
+                            <div class="env-label">湿度</div>
+                        </div>
+                        <div class="weather-metric">
+                            <div class="env-value">2.1m/s</div>
+                            <div class="env-label">風速</div>
+                        </div>
+                        <div class="weather-metric">
+                            <div class="env-value">1013hPa</div>
+                            <div class="env-label">気圧</div>
+                        </div>
+                        <div class="weather-metric">
+                            <div class="env-value">15%</div>
+                            <div class="env-label">降水確率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-forecast">
+                    <div class="forecast-day">
+                        <div class="forecast-date">明日</div>
+                        <div class="forecast-icon">☀️</div>
+                        <div class="forecast-temp">28/18°C</div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="forecast-date">明後日</div>
+                        <div class="forecast-icon">🌧️</div>
+                        <div class="forecast-temp">22/16°C</div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="forecast-date">3日後</div>
+                        <div class="forecast-icon">⛅</div>
+                        <div class="forecast-temp">26/19°C</div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="forecast-date">4日後</div>
+                        <div class="forecast-icon">☀️</div>
+                        <div class="forecast-temp">29/20°C</div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="forecast-date">5日後</div>
+                        <div class="forecast-icon">⛅</div>
+                        <div class="forecast-temp">27/18°C</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-insights">
+            <h2 class="section-title">🤖 AI農業分析</h2>
+            
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>💧</span>
+                    灌水最適化提案
+                </div>
+                <div class="insight-content">
+                    B-2圃場のトマトの土壌水分が低下しています。明日の降雨確率も低いため、早急な灌水が必要です。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 今夜21時から30分間の自動灌水を推奨します。
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>🌾</span>
+                    収穫時期予測
+                </div>
+                <div class="insight-content">
+                    A-1圃場の水稲は順調に生育しており、予定より3日早く収穫時期を迎える見込みです。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 9月12日頃からの収穫準備を開始してください。
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>🍎</span>
+                    病害虫リスク警告
+                </div>
+                <div class="insight-content">
+                    C-3圃場のリンゴで斑点落葉病の発生リスクが高まっています。湿度と気温の条件が病原菌の繁殖に適しています。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 予防散布を3日以内に実施することを推奨します。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2 class="section-title">🚨 アラート・通知</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">💧</div>
+                <div class="alert-content">
+                    <div class="alert-title">土壌水分低下警告</div>
+                    <div>B-2圃場の土壌水分が32%まで低下しています。灌水が必要です。</div>
+                    <div class="alert-time">10分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">🌡️</div>
+                <div class="alert-content">
+                    <div class="alert-title">高温注意報</div>
+                    <div>明日の最高気温が32°Cの予報です。熱害対策を検討してください。</div>
+                    <div class="alert-time">30分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">🔧</div>
+                <div class="alert-content">
+                    <div class="alert-title">センサーメンテナンス</div>
+                    <div>A-1圃場の土壌水分センサーの定期メンテナンスが予定されています。</div>
+                    <div class="alert-time">2時間前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">🎛️ 農場管制センター</h2>
+            
+            <div class="message-box">
+                <h3>📱 農場スタッフ連絡</h3>
+                <textarea class="message-input" placeholder="農作業や圃場の状況に関する連絡事項を入力してください..."></textarea>
+                <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="autoIrrigation()">💧 自動灌水開始</button>
+                <button class="btn btn-secondary" onclick="droneMonitoring()">🚁 ドローン巡回</button>
+                <button class="btn" onclick="harvestSchedule()">🌾 収穫スケジュール</button>
+                <button class="btn btn-warning" onclick="pestControl()">🐛 病害虫対策</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを農場スタッフに送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function filterCrop(crop) {
+            const buttons = document.querySelectorAll('.crop-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const cropNames = {
+                'all': '全作物',
+                'rice': '水稲',
+                'vegetable': '野菜',
+                'fruit': '果実'
+            };
+            alert(`${cropNames[crop]}でフィルタリングしました。`);
+        }
+
+        function viewField(fieldId) {
+            alert(`圃場 ${fieldId} の詳細情報を表示します。生育状況、センサーデータ、作業履歴を確認できます。`);
+        }
+
+        function waterControl(fieldId) {
+            if (confirm(`圃場 ${fieldId} の灌水システムを操作しますか？`)) {
+                alert(`圃場 ${fieldId} の自動灌水を開始しました。`);
+            }
+        }
+
+        function addTask(fieldId) {
+            const task = prompt(`圃場 ${fieldId} に追加する作業を入力してください:`);
+            if (task) {
+                alert(`圃場 ${fieldId} に作業「${task}」を追加しました。`);
+            }
+        }
+
+        function autoIrrigation() {
+            alert('AI分析に基づく最適な灌水スケジュールを実行します。各圃場の土壌水分と作物の生育状況に応じて自動制御します。');
+        }
+
+        function droneMonitoring() {
+            alert('ドローンによる圃場巡回を開始します。植生指数（NDVI）、病害虫発生状況、生育ムラを撮影・分析します。');
+        }
+
+        function harvestSchedule() {
+            alert('AI予測による収穫スケジュールを表示します。気象データと生育状況から最適な収穫時期を算出します。');
+        }
+
+        function pestControl() {
+            alert('病害虫対策システムを開きます。発生予測、防除記録、薬剤使用履歴を管理できます。');
+        }
+
+        // 環境データのリアルタイム更新シミュレーション
+        function updateEnvironmentalData() {
+            const tempValues = document.querySelectorAll('.env-value');
+            tempValues.forEach(value => {
+                if (value.textContent.includes('°C')) {
+                    const baseTemp = parseFloat(value.textContent);
+                    const variation = (Math.random() - 0.5) * 2;
+                    const newTemp = (baseTemp + variation).toFixed(1);
+                    value.textContent = newTemp + '°C';
+                }
+            });
+        }
+
+        // 進捗バーのアニメーション
+        window.addEventListener('load', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        });
+
+        // 5分ごとに環境データを更新
+        setInterval(updateEnvironmentalData, 300000);
+    </script>
+</body>
+</html>

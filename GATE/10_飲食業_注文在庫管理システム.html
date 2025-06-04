@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートレストラン - AI連携店舗運営最適化システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e17055 0%, #fd79a8 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .restaurant-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #e17055;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .orders-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .orders-header {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .order-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e17055;
+            background: white;
+            color: #e17055;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: #e17055;
+            color: white;
+        }
+
+        .orders-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .order-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .order-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .order-time {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .order-details {
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .item-name {
+            color: #2c3e50;
+        }
+
+        .item-quantity {
+            color: #7f8c8d;
+        }
+
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e17055;
+            margin-bottom: 10px;
+        }
+
+        .order-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-preparing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-cooking {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e17055, #fd79a8);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .inventory-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .inventory-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .inventory-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .ingredient-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stock-level {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .stock-good {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stock-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .stock-critical {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .inventory-details {
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #7f8c8d;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .usage-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .usage-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .usage-good {
+            background: linear-gradient(90deg, #00b894, #00cec9);
+        }
+
+        .usage-medium {
+            background: linear-gradient(90deg, #fdcb6e, #f39c12);
+        }
+
+        .usage-critical {
+            background: linear-gradient(90deg, #e17055, #e74c3c);
+        }
+
+        .kitchen-section {
+            padding: 30px;
+        }
+
+        .kitchen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .station-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .station-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .station-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .station-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .station-busy {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .station-normal {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .station-idle {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .station-queue {
+            margin-bottom: 15px;
+        }
+
+        .queue-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .queue-order {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .queue-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .analytics-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .analytics-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .analytics-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .analytics-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e17055;
+            margin-bottom: 5px;
+        }
+
+        .analytics-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+            color: white;
+        }
+
+        .alerts-section {
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #e17055;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e17055, #fd79a8);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(225, 112, 85, 0.4);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #e17055;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #e17055;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .restaurant-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .orders-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-filter {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .order-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-status {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kitchen-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ スマートレストラン</h1>
+            <div class="subtitle">AI連携店舗運営最適化システム</div>
+        </div>
+
+        <div class="restaurant-stats">
+            <div class="stat-card">
+                <div class="stat-value">47</div>
+                <div class="stat-label">進行中の注文</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">¥342K</div>
+                <div class="stat-label">本日売上</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8.5分</div>
+                <div class="stat-label">平均調理時間</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">92%</div>
+                <div class="stat-label">顧客満足度</div>
+            </div>
+        </div>
+
+        <div class="orders-section">
+            <h2 class="section-title">📝 注文管理</h2>
+            
+            <div class="orders-header">
+                <div class="order-filter">
+                    <button class="filter-btn active" onclick="filterOrders('all')">全注文</button>
+                    <button class="filter-btn" onclick="filterOrders('preparing')">準備中</button>
+                    <button class="filter-btn" onclick="filterOrders('cooking')">調理中</button>
+                    <button class="filter-btn" onclick="filterOrders('ready')">完成</button>
+                </div>
+            </div>
+
+            <div class="orders-grid">
+                <div class="order-card">
+                    <div class="order-info">
+                        <div class="order-header">
+                            <div class="order-number">注文 #1247</div>
+                            <div class="order-time">14:32 注文</div>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-item">
+                                <span class="item-name">ハンバーガーセット</span>
+                                <span class="item-quantity">x2</span>
+                            </div>
+                            <div class="order-item">
+                                <span class="item-name">フライドポテト</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                            <div class="order-item">
+                                <span class="item-name">コーラ</span>
+                                <span class="item-quantity">x2</span>
+                            </div>
+                        </div>
+                        <div class="order-total">合計: ¥2,450</div>
+                        <div style="color: #7f8c8d; font-size: 0.9rem;">テーブル 12 | 田中様</div>
+                    </div>
+                    <div class="order-status">
+                        <span class="status-badge status-cooking">調理中</span>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">残り時間: 5分</div>
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn-small btn-success" onclick="updateOrderStatus('1247', 'ready')">完成</button>
+                        <button class="btn-small btn-info" onclick="viewOrderDetails('1247')">詳細</button>
+                        <button class="btn-small btn-primary" onclick="contactCustomer('1247')">連絡</button>
+                    </div>
+                </div>
+
+                <div class="order-card">
+                    <div class="order-info">
+                        <div class="order-header">
+                            <div class="order-number">注文 #1248</div>
+                            <div class="order-time">14:45 注文</div>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-item">
+                                <span class="item-name">カルボナーラ</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                            <div class="order-item">
+                                <span class="item-name">シーザーサラダ</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                            <div class="order-item">
+                                <span class="item-name">アイスティー</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                        </div>
+                        <div class="order-total">合計: ¥1,680</div>
+                        <div style="color: #7f8c8d; font-size: 0.9rem;">テーブル 7 | 佐藤様</div>
+                    </div>
+                    <div class="order-status">
+                        <span class="status-badge status-preparing">準備中</span>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">待ち時間: 3分</div>
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn-small btn-success" onclick="updateOrderStatus('1248', 'cooking')">調理開始</button>
+                        <button class="btn-small btn-info" onclick="viewOrderDetails('1248')">詳細</button>
+                        <button class="btn-small btn-primary" onclick="contactCustomer('1248')">連絡</button>
+                    </div>
+                </div>
+
+                <div class="order-card">
+                    <div class="order-info">
+                        <div class="order-header">
+                            <div class="order-number">注文 #1249</div>
+                            <div class="order-time">15:02 注文</div>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-item">
+                                <span class="item-name">ステーキセット</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                            <div class="order-item">
+                                <span class="item-name">ミックスサラダ</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                            <div class="order-item">
+                                <span class="item-name">赤ワイン</span>
+                                <span class="item-quantity">x1</span>
+                            </div>
+                        </div>
+                        <div class="order-total">合計: ¥3,850</div>
+                        <div style="color: #7f8c8d; font-size: 0.9rem;">テーブル 3 | 山田様</div>
+                    </div>
+                    <div class="order-status">
+                        <span class="status-badge status-ready">完成</span>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">配膳待ち</div>
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn-small btn-success" onclick="updateOrderStatus('1249', 'delivered')">配膳完了</button>
+                        <button class="btn-small btn-info" onclick="viewOrderDetails('1249')">詳細</button>
+                        <button class="btn-small btn-primary" onclick="contactCustomer('1249')">連絡</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="inventory-section">
+            <h2 class="section-title">📦 在庫管理</h2>
+            
+            <div class="inventory-grid">
+                <div class="inventory-card">
+                    <div class="inventory-header">
+                        <div class="ingredient-name">牛肉（ハンバーガー用）</div>
+                        <span class="stock-level stock-good">充分</span>
+                    </div>
+                    <div class="inventory-details">
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫:</span>
+                            <span class="detail-value">45kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">安全在庫:</span>
+                            <span class="detail-value">15kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">消費期限:</span>
+                            <span class="detail-value">3日後</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">本日使用量:</span>
+                            <span class="detail-value">8.5kg</span>
+                        </div>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-fill usage-good" style="width: 75%;">75%</div>
+                    </div>
+                    <button class="btn-small btn-primary" onclick="manageInventory('beef')">在庫管理</button>
+                </div>
+
+                <div class="inventory-card">
+                    <div class="inventory-header">
+                        <div class="ingredient-name">トマト（新鮮）</div>
+                        <span class="stock-level stock-low">少ない</span>
+                    </div>
+                    <div class="inventory-details">
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫:</span>
+                            <span class="detail-value">2.3kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">安全在庫:</span>
+                            <span class="detail-value">5kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">消費期限:</span>
+                            <span class="detail-value">2日後</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">本日使用量:</span>
+                            <span class="detail-value">3.2kg</span>
+                        </div>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-fill usage-medium" style="width: 46%;">46%</div>
+                    </div>
+                    <button class="btn-small btn-primary" onclick="manageInventory('tomato')">緊急発注</button>
+                </div>
+
+                <div class="inventory-card">
+                    <div class="inventory-header">
+                        <div class="ingredient-name">パスタ（スパゲッティ）</div>
+                        <span class="stock-level stock-critical">不足</span>
+                    </div>
+                    <div class="inventory-details">
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫:</span>
+                            <span class="detail-value">1.2kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">安全在庫:</span>
+                            <span class="detail-value">8kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">消費期限:</span>
+                            <span class="detail-value">30日後</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">本日使用量:</span>
+                            <span class="detail-value">4.5kg</span>
+                        </div>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-fill usage-critical" style="width: 15%;">15%</div>
+                    </div>
+                    <button class="btn-small btn-primary" onclick="manageInventory('pasta')">緊急発注</button>
+                </div>
+
+                <div class="inventory-card">
+                    <div class="inventory-header">
+                        <div class="ingredient-name">チーズ（モッツァレラ）</div>
+                        <span class="stock-level stock-good">充分</span>
+                    </div>
+                    <div class="inventory-details">
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫:</span>
+                            <span class="detail-value">12kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">安全在庫:</span>
+                            <span class="detail-label">3kg</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">消費期限:</span>
+                            <span class="detail-value">7日後</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">本日使用量:</span>
+                            <span class="detail-value">2.1kg</span>
+                        </div>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-fill usage-good" style="width: 80%;">80%</div>
+                    </div>
+                    <button class="btn-small btn-primary" onclick="manageInventory('cheese')">在庫管理</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="kitchen-section">
+            <h2 class="section-title">🍳 キッチン状況</h2>
+            
+            <div class="kitchen-grid">
+                <div class="station-card">
+                    <div class="station-header">
+                        <div class="station-name">グリル担当</div>
+                        <span class="station-status station-busy">混雑</span>
+                    </div>
+                    <div class="station-queue">
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1247 - ハンバーガー</div>
+                            <div class="queue-time">残り5分</div>
+                        </div>
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1250 - ステーキ</div>
+                            <div class="queue-time">待機中</div>
+                        </div>
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1251 - グリルチキン</div>
+                            <div class="queue-time">待機中</div>
+                        </div>
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem;">担当: 鈴木シェフ</div>
+                </div>
+
+                <div class="station-card">
+                    <div class="station-header">
+                        <div class="station-name">パスタ担当</div>
+                        <span class="station-status station-normal">通常</span>
+                    </div>
+                    <div class="station-queue">
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1248 - カルボナーラ</div>
+                            <div class="queue-time">準備中</div>
+                        </div>
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1252 - ボロネーゼ</div>
+                            <div class="queue-time">待機中</div>
+                        </div>
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem;">担当: 田中シェフ</div>
+                </div>
+
+                <div class="station-card">
+                    <div class="station-header">
+                        <div class="station-name">サラダ・前菜</div>
+                        <span class="station-status station-idle">空き</span>
+                    </div>
+                    <div class="station-queue">
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1249 - サラダ</div>
+                            <div class="queue-time">完成</div>
+                        </div>
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem;">担当: 佐藤スタッフ</div>
+                </div>
+
+                <div class="station-card">
+                    <div class="station-header">
+                        <div class="station-name">ドリンク担当</div>
+                        <span class="station-status station-normal">通常</span>
+                    </div>
+                    <div class="station-queue">
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1253 - カクテル</div>
+                            <div class="queue-time">準備中</div>
+                        </div>
+                        <div class="queue-item">
+                            <div class="queue-order">注文 #1254 - コーヒー</div>
+                            <div class="queue-time">待機中</div>
+                        </div>
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem;">担当: 山田スタッフ</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-section">
+            <h2 class="section-title">📊 運営分析</h2>
+            
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="analytics-icon">👥</div>
+                    <div class="analytics-value">156</div>
+                    <div class="analytics-label">本日来客数</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-icon">⏱️</div>
+                    <div class="analytics-value">8.5分</div>
+                    <div class="analytics-label">平均調理時間</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-icon">💰</div>
+                    <div class="analytics-value">¥2,195</div>
+                    <div class="analytics-label">客単価</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-icon">🎯</div>
+                    <div class="analytics-value">95%</div>
+                    <div class="analytics-label">注文完了率</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-icon">🍽️</div>
+                    <div class="analytics-value">78回</div>
+                    <div class="analytics-label">テーブル回転数</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-icon">⭐</div>
+                    <div class="analytics-value">4.6</div>
+                    <div class="analytics-label">平均評価</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>📈 売上・来客数トレンド</h3>
+                <p>リアルタイム店舗データとAI予測分析</p>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2 class="section-title">🔔 重要通知</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">📦</div>
+                <div class="alert-content">
+                    <div class="alert-title">在庫不足警告</div>
+                    <div>パスタの在庫が安全在庫を下回りました。緊急発注が必要です。</div>
+                    <div class="alert-time">10分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">⏰</div>
+                <div class="alert-content">
+                    <div class="alert-title">調理時間超過</div>
+                    <div>注文 #1247の調理時間が予定を3分超過しています。</div>
+                    <div class="alert-time">5分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">🍅</div>
+                <div class="alert-content">
+                    <div class="alert-title">食材消費期限注意</div>
+                    <div>トマトの消費期限が2日後に迫っています。使用予定を確認してください。</div>
+                    <div class="alert-time">30分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">👥</div>
+                <div class="alert-content">
+                    <div class="alert-title">混雑予測</div>
+                    <div>18:00〜20:00の予約が集中しています。スタッフ配置を調整してください。</div>
+                    <div class="alert-time">1時間前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">🎛️ 店舗管制センター</h2>
+            
+            <div class="message-box">
+                <h3>📱 スタッフ連絡</h3>
+                <textarea class="message-input" placeholder="キッチンスタッフやホールスタッフへの連絡事項を入力してください..."></textarea>
+                <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="autoOrder()">📦 自動発注実行</button>
+                <button class="btn" onclick="menuOptimization()">🍽️ メニュー最適化</button>
+                <button class="btn" onclick="staffSchedule()">👥 スタッフ配置</button>
+                <button class="btn" onclick="salesReport()">📊 売上分析</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージをスタッフに送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function filterOrders(status) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const statusNames = {
+                'all': '全注文',
+                'preparing': '準備中',
+                'cooking': '調理中',
+                'ready': '完成'
+            };
+            alert(`${statusNames[status]}でフィルタリングしました。`);
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const statusNames = {
+                'ready': '完成',
+                'cooking': '調理開始',
+                'delivered': '配膳完了'
+            };
+            alert(`注文 #${orderId} のステータスを「${statusNames[newStatus]}」に更新しました。`);
+        }
+
+        function viewOrderDetails(orderId) {
+            alert(`注文 #${orderId} の詳細情報を表示します。注文内容、お客様情報、特別要望を確認できます。`);
+        }
+
+        function contactCustomer(orderId) {
+            alert(`注文 #${orderId} のお客様に連絡します。調理遅延のお詫びや完成通知を送信できます。`);
+        }
+
+        function manageInventory(ingredient) {
+            const ingredientNames = {
+                'beef': '牛肉',
+                'tomato': 'トマト',
+                'pasta': 'パスタ',
+                'cheese': 'チーズ'
+            };
+            alert(`${ingredientNames[ingredient]}の在庫管理を開きます。発注履歴、使用量予測、仕入先情報を確認できます。`);
+        }
+
+        function autoOrder() {
+            alert('AI分析に基づく自動発注を実行します。売上予測と在庫状況から最適な発注量を算出します。');
+        }
+
+        function menuOptimization() {
+            alert('メニュー最適化分析を実行します。売上データと在庫状況から収益性の高いメニュー構成を提案します。');
+        }
+
+        function staffSchedule() {
+            alert('AI予測による最適なスタッフ配置を提案します。来客予測と過去データから効率的なシフトを作成します。');
+        }
+
+        function salesReport() {
+            alert('詳細な売上分析レポートを生成します。時間帯別、メニュー別、曜日別の売上トレンドを分析します。');
+        }
+
+        // リアルタイム更新のシミュレーション
+        function updateRestaurantStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            // 進行中の注文数をリアルタイム更新
+            const currentOrders = parseInt(statValues[0].textContent);
+            const variation = Math.floor(Math.random() * 6) - 3; // -3 to +3
+            const newOrders = Math.max(0, currentOrders + variation);
+            statValues[0].textContent = newOrders;
+
+            // 本日売上をリアルタイム更新
+            const currentSales = parseInt(statValues[1].textContent.replace('¥', '').replace('K', '')) * 1000;
+            const salesVariation = Math.floor(Math.random() * 10000);
+            const newSales = currentSales + salesVariation;
+            statValues[1].textContent = '¥' + Math.floor(newSales / 1000) + 'K';
+        }
+
+        // 調理時間のカウントダウン
+        function updateCookingTime() {
+            const timeElements = document.querySelectorAll('.queue-time');
+            timeElements.forEach(element => {
+                if (element.textContent.includes('残り')) {
+                    const currentMinutes = parseInt(element.textContent.match(/\d+/)[0]);
+                    if (currentMinutes > 0) {
+                        element.textContent = `残り${currentMinutes - 1}分`;
+                    } else {
+                        element.textContent = '完成間近';
+                        element.style.color = '#27ae60';
+                        element.style.fontWeight = 'bold';
+                    }
+                }
+            });
+        }
+
+        // 30秒ごとに統計データを更新
+        setInterval(updateRestaurantStats, 30000);
+
+        // 1分ごとに調理時間を更新
+        setInterval(updateCookingTime, 60000);
+
+        // 在庫レベルの動的更新
+        function updateInventoryLevels() {
+            const usageFills = document.querySelectorAll('.usage-fill');
+            usageFills.forEach(fill => {
+                const currentWidth = parseInt(fill.style.width);
+                const usage = Math.floor(Math.random() * 5); // 0-5%の使用量
+                const newWidth = Math.max(0, currentWidth - usage);
+                fill.style.width = newWidth + '%';
+                fill.textContent = newWidth + '%';
+                
+                // 色の更新
+                if (newWidth > 60) {
+                    fill.className = 'usage-fill usage-good';
+                } else if (newWidth > 30) {
+                    fill.className = 'usage-fill usage-medium';
+                } else {
+                    fill.className = 'usage-fill usage-critical';
+                }
+            });
+        }
+
+        // 5分ごとに在庫レベルを更新
+        setInterval(updateInventoryLevels, 300000);
+    </script>
+</body>
+</html>

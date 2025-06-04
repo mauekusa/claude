@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートプロパティ - 統合不動産管理プラットフォーム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .property-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #6c5ce7;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .property-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .filter-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #ddd, #bbb);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .property-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .property-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .property-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-occupied {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-maintenance {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-inspection {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .property-details {
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #7f8c8d;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .rent {
+            color: #6c5ce7;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .tenant-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .tenant-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .contract-details {
+            color: #7f8c8d;
+        }
+
+        .property-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+            color: white;
+        }
+
+        .financial-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .financial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .financial-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .financial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .financial-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .amount {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+
+        .financial-details {
+            margin-bottom: 15px;
+        }
+
+        .payment-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .maintenance-section {
+            padding: 30px;
+        }
+
+        .maintenance-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .maintenance-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .maintenance-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .maintenance-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .maintenance-details {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .maintenance-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .priority-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .analytics-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+        }
+
+        .alerts-section {
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #6c5ce7;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #6c5ce7;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .property-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .property-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .property-status {
+                margin: 10px 0 0 0;
+            }
+
+            .property-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .financial-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .maintenance-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 スマートプロパティ</h1>
+            <div class="subtitle">統合不動産管理プラットフォーム</div>
+        </div>
+
+        <div class="property-stats">
+            <div class="stat-card">
+                <div class="stat-value">247</div>
+                <div class="stat-label">総管理物件数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">92.8%</div>
+                <div class="stat-label">入居率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">¥12.4M</div>
+                <div class="stat-label">月間収益</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">要対応案件</div>
+            </div>
+        </div>
+
+        <div class="property-section">
+            <h2 class="section-title">🏠 物件管理</h2>
+            
+            <div class="filter-bar">
+                <input type="text" class="filter-input" placeholder="物件名、住所、テナント名で検索...">
+                <select class="filter-select">
+                    <option>物件タイプ</option>
+                    <option>アパート</option>
+                    <option>マンション</option>
+                    <option>戸建て</option>
+                    <option>オフィス</option>
+                    <option>店舗</option>
+                </select>
+                <select class="filter-select">
+                    <option>入居状況</option>
+                    <option>空室</option>
+                    <option>入居中</option>
+                    <option>メンテナンス中</option>
+                </select>
+                <select class="filter-select">
+                    <option>エリア</option>
+                    <option>渋谷区</option>
+                    <option>新宿区</option>
+                    <option>港区</option>
+                    <option>千代田区</option>
+                </select>
+            </div>
+
+            <div class="property-grid">
+                <div class="property-card">
+                    <div class="property-image">🏢</div>
+                    <div class="property-header">
+                        <div class="property-title">グランドマンション渋谷 101号室</div>
+                        <span class="property-status status-occupied">入居中</span>
+                    </div>
+                    <div class="property-details">
+                        <div class="detail-row">
+                            <span class="detail-label">所在地:</span>
+                            <span class="detail-value">渋谷区神南1-2-3</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">間取り:</span>
+                            <span class="detail-value">2LDK (65㎡)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">築年数:</span>
+                            <span class="detail-value">8年</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">賃料:</span>
+                            <span class="detail-value rent">¥185,000/月</span>
+                        </div>
+                    </div>
+                    <div class="tenant-info">
+                        <div class="tenant-name">田中 太郎 様</div>
+                        <div class="contract-details">
+                            契約期間: 2022/04/01 - 2024/03/31<br>
+                            更新予定: 2024年2月
+                        </div>
+                    </div>
+                    <div class="property-actions">
+                        <button class="btn-small btn-primary" onclick="viewProperty('P001')">詳細</button>
+                        <button class="btn-small btn-info" onclick="contactTenant('P001')">連絡</button>
+                        <button class="btn-small btn-success" onclick="scheduleInspection('P001')">点検</button>
+                    </div>
+                </div>
+
+                <div class="property-card">
+                    <div class="property-image">🏠</div>
+                    <div class="property-header">
+                        <div class="property-title">コーポ新宿 205号室</div>
+                        <span class="property-status status-available">空室</span>
+                    </div>
+                    <div class="property-details">
+                        <div class="detail-row">
+                            <span class="detail-label">所在地:</span>
+                            <span class="detail-value">新宿区西新宿2-1-5</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">間取り:</span>
+                            <span class="detail-value">1K (28㎡)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">築年数:</span>
+                            <span class="detail-value">15年</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">賃料:</span>
+                            <span class="detail-value rent">¥98,000/月</span>
+                        </div>
+                    </div>
+                    <div class="tenant-info" style="background: #fff3cd; color: #856404;">
+                        <div class="tenant-name">空室期間: 2ヶ月</div>
+                        <div class="contract-details">
+                            前回退去: 2024/10/15<br>
+                            内見予約: 3件
+                        </div>
+                    </div>
+                    <div class="property-actions">
+                        <button class="btn-small btn-primary" onclick="viewProperty('P002')">詳細</button>
+                        <button class="btn-small btn-warning" onclick="marketProperty('P002')">募集</button>
+                        <button class="btn-small btn-info" onclick="scheduleShowing('P002')">内見</button>
+                    </div>
+                </div>
+
+                <div class="property-card">
+                    <div class="property-image">🏢</div>
+                    <div class="property-header">
+                        <div class="property-title">ビジネス港 302号室</div>
+                        <span class="property-status status-maintenance">メンテナンス中</span>
+                    </div>
+                    <div class="property-details">
+                        <div class="detail-row">
+                            <span class="detail-label">所在地:</span>
+                            <span class="detail-value">港区赤坂3-4-6</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">間取り:</span>
+                            <span class="detail-value">オフィス (45㎡)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">築年数:</span>
+                            <span class="detail-value">12年</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">賃料:</span>
+                            <span class="detail-value rent">¥280,000/月</span>
+                        </div>
+                    </div>
+                    <div class="tenant-info" style="background: #f8d7da; color: #721c24;">
+                        <div class="tenant-name">メンテナンス作業中</div>
+                        <div class="contract-details">
+                            作業内容: エアコン交換、壁紙張替<br>
+                            完了予定: 2024/12/10
+                        </div>
+                    </div>
+                    <div class="property-actions">
+                        <button class="btn-small btn-primary" onclick="viewProperty('P003')">詳細</button>
+                        <button class="btn-small btn-warning" onclick="checkMaintenance('P003')">進捗</button>
+                        <button class="btn-small btn-info" onclick="scheduleCompletion('P003')">完了予定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="financial-section">
+            <h2 class="section-title">💰 収支管理</h2>
+            
+            <div class="financial-grid">
+                <div class="financial-card">
+                    <div class="financial-header">
+                        <div class="financial-title">今月の収入</div>
+                        <div class="amount">¥12,450,000</div>
+                    </div>
+                    <div class="financial-details">
+                        <div class="detail-row">
+                            <span>家賃収入:</span>
+                            <span>¥11,800,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>共益費:</span>
+                            <span>¥480,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>駐車場代:</span>
+                            <span>¥170,000</span>
+                        </div>
+                    </div>
+                    <span class="payment-status status-available">収納率: 98.2%</span>
+                </div>
+
+                <div class="financial-card">
+                    <div class="financial-header">
+                        <div class="financial-title">今月の支出</div>
+                        <div class="amount">¥3,280,000</div>
+                    </div>
+                    <div class="financial-details">
+                        <div class="detail-row">
+                            <span>管理費:</span>
+                            <span>¥1,240,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>修繕費:</span>
+                            <span>¥890,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>税金・保険:</span>
+                            <span>¥1,150,000</span>
+                        </div>
+                    </div>
+                    <span class="payment-status status-maintenance">予算対比: 102%</span>
+                </div>
+
+                <div class="financial-card">
+                    <div class="financial-header">
+                        <div class="financial-title">純利益</div>
+                        <div class="amount">¥9,170,000</div>
+                    </div>
+                    <div class="financial-details">
+                        <div class="detail-row">
+                            <span>利益率:</span>
+                            <span>73.7%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>前月比:</span>
+                            <span>+2.8%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>年計:</span>
+                            <span>¥108,450,000</span>
+                        </div>
+                    </div>
+                    <span class="payment-status status-available">目標達成</span>
+                </div>
+
+                <div class="financial-card">
+                    <div class="financial-header">
+                        <div class="financial-title">滞納状況</div>
+                        <div class="amount">3件</div>
+                    </div>
+                    <div class="financial-details">
+                        <div class="detail-row">
+                            <span>滞納額:</span>
+                            <span>¥562,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>最長滞納:</span>
+                            <span>3ヶ月</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>回収予定:</span>
+                            <span>12/15</span>
+                        </div>
+                    </div>
+                    <span class="payment-status status-inspection">要対応</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="maintenance-section">
+            <h2 class="section-title">🔧 メンテナンス管理</h2>
+            
+            <div class="maintenance-grid">
+                <div class="maintenance-item">
+                    <div class="maintenance-info">
+                        <div class="maintenance-title">エアコン故障 - グランドマンション渋谷 205号室</div>
+                        <div class="maintenance-details">
+                            報告日: 2024/12/03 | 担当業者: ㈱冷暖房サービス<br>
+                            症状: 冷房が効かない、異音がする
+                        </div>
+                    </div>
+                    <div class="maintenance-status">
+                        <span class="priority-badge priority-high">緊急</span>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">12/5 修理予定</div>
+                    </div>
+                    <button class="btn-small btn-warning" onclick="updateMaintenance('M001')">更新</button>
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="maintenance-info">
+                        <div class="maintenance-title">給湯器定期点検 - コーポ新宿 全戸</div>
+                        <div class="maintenance-details">
+                            予定日: 2024/12/10 | 担当業者: ㈱ガス点検センター<br>
+                            作業内容: 年次定期点検、フィルター清掃
+                        </div>
+                    </div>
+                    <div class="maintenance-status">
+                        <span class="priority-badge priority-medium">通常</span>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">予定通り</div>
+                    </div>
+                    <button class="btn-small btn-info" onclick="updateMaintenance('M002')">確認</button>
+                </div>
+
+                <div class="maintenance-item">
+                    <div class="maintenance-info">
+                        <div class="maintenance-title">共用部清掃 - ビジネス港 全フロア</div>
+                        <div class="maintenance-details">
+                            実施日: 2024/12/02 | 担当業者: ㈱クリーンサービス<br>
+                            作業内容: エントランス、廊下、階段の清掃
+                        </div>
+                    </div>
+                    <div class="maintenance-status">
+                        <span class="priority-badge priority-low">完了</span>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">作業完了</div>
+                    </div>
+                    <button class="btn-small btn-success" onclick="updateMaintenance('M003')">確認済</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-section">
+            <h2 class="section-title">📊 運営分析</h2>
+            <div class="chart-container">
+                <h3>📈 収益・入居率トレンド</h3>
+                <p>過去12ヶ月の運営実績とAI予測</p>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2 class="section-title">🔔 重要通知</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">🚨</div>
+                <div class="alert-content">
+                    <div class="alert-title">契約更新期限間近</div>
+                    <div>グランドマンション渋谷 101号室の田中様の契約が2ヶ月後に満了します。</div>
+                    <div class="alert-time">1時間前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">💰</div>
+                <div class="alert-content">
+                    <div class="alert-title">家賃滞納発生</div>
+                    <div>コーポ新宿 304号室の家賃が2ヶ月滞納しています。催促が必要です。</div>
+                    <div class="alert-time">3時間前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">🔧</div>
+                <div class="alert-content">
+                    <div class="alert-title">緊急修理完了</div>
+                    <div>ビジネス港 302号室のエアコン修理が完了しました。</div>
+                    <div class="alert-time">1日前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">👥</div>
+                <div class="alert-content">
+                    <div class="alert-title">内見予約</div>
+                    <div>コーポ新宿 205号室の内見予約が入りました。明日14:00〜</div>
+                    <div class="alert-time">2日前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">🎛️ 不動産管理センター</h2>
+            
+            <div class="message-box">
+                <h3>📱 関係者連絡</h3>
+                <textarea class="message-input" placeholder="テナント、業者、スタッフへの連絡事項を入力してください..."></textarea>
+                <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="generateReport()">📊 運営レポート</button>
+                <button class="btn" onclick="scheduleMaintenance()">🔧 メンテナンス予約</button>
+                <button class="btn" onclick="manageContracts()">📋 契約管理</button>
+                <button class="btn" onclick="tenantCommunication()">👥 テナント連絡</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを関係者に送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function viewProperty(propertyId) {
+            alert(`物件 ${propertyId} の詳細情報を表示します。間取り図、写真、契約履歴を確認できます。`);
+        }
+
+        function contactTenant(propertyId) {
+            alert(`物件 ${propertyId} のテナントに連絡します。メール・電話での連絡が可能です。`);
+        }
+
+        function scheduleInspection(propertyId) {
+            alert(`物件 ${propertyId} の定期点検をスケジュールします。`);
+        }
+
+        function marketProperty(propertyId) {
+            alert(`物件 ${propertyId} の募集を開始します。不動産ポータルサイトに掲載されます。`);
+        }
+
+        function scheduleShowing(propertyId) {
+            alert(`物件 ${propertyId} の内見予約を管理します。`);
+        }
+
+        function checkMaintenance(propertyId) {
+            alert(`物件 ${propertyId} のメンテナンス進捗を確認します。`);
+        }
+
+        function scheduleCompletion(propertyId) {
+            alert(`物件 ${propertyId} の工事完了予定を設定します。`);
+        }
+
+        function updateMaintenance(maintenanceId) {
+            alert(`メンテナンス ${maintenanceId} の状況を更新します。`);
+        }
+
+        function generateReport() {
+            alert('運営レポートを生成します。収益分析、入居率推移、メンテナンス履歴を含む包括的なレポートです。');
+        }
+
+        function scheduleMaintenance() {
+            alert('メンテナンス予約システムを開きます。業者スケジュールと連携して最適な日程を提案します。');
+        }
+
+        function manageContracts() {
+            alert('契約管理システムを開きます。更新期限、家賃改定、特約事項を一元管理できます。');
+        }
+
+        function tenantCommunication() {
+            alert('テナント連絡システムを開きます。一斉通知、個別連絡、苦情対応を管理できます。');
+        }
+
+        // 不動産データのリアルタイム更新シミュレーション
+        function updatePropertyStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            // 入居率の微調整
+            const occupancyRate = statValues[1];
+            const currentRate = parseFloat(occupancyRate.textContent);
+            const variation = (Math.random() - 0.5) * 0.2;
+            const newRate = Math.max(85, Math.min(100, currentRate + variation));
+            occupancyRate.textContent = newRate.toFixed(1) + '%';
+        }
+
+        // 10分ごとに統計データを更新
+        setInterval(updatePropertyStats, 600000);
+
+        // 収益データの動的更新
+        function updateFinancialData() {
+            const amounts = document.querySelectorAll('.amount');
+            amounts.forEach(amount => {
+                if (amount.textContent.includes('¥') && amount.textContent.includes('M')) {
+                    const baseValue = parseFloat(amount.textContent.replace('¥', '').replace('M', ''));
+                    const variation = (Math.random() - 0.5) * 0.2;
+                    const newValue = Math.max(0, baseValue + variation);
+                    amount.textContent = '¥' + newValue.toFixed(1) + 'M';
+                }
+            });
+        }
+
+        // 30分ごとに財務データを更新
+        setInterval(updateFinancialData, 1800000);
+    </script>
+</body>
+</html>
