@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートリテール - AI連携在庫最適化システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #8e44ad 0%, #3498db 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #9b59b6 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #9b59b6;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .inventory-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .search-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #9b59b6;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .stock-level {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .stock-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stock-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .stock-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .product-details {
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #7f8c8d;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .price {
+            color: #27ae60;
+            font-size: 1.2rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .ai-insights {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid #9b59b6;
+        }
+
+        .insight-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insight-content {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .recommendation {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .sales-analytics {
+            padding: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .alerts-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #9b59b6;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .action-panel {
+            padding: 30px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #9b59b6;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #9b59b6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ スマートリテール</h1>
+            <div class="subtitle">AI連携在庫最適化システム</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">2,847</div>
+                <div class="metric-label">総商品数</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">¥2.4M</div>
+                <div class="metric-label">在庫価値</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">23</div>
+                <div class="metric-label">要補充商品</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">95.2%</div>
+                <div class="metric-label">在庫回転率</div>
+            </div>
+        </div>
+
+        <div class="inventory-section">
+            <h2 class="section-title">📦 在庫管理</h2>
+            
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="商品名、JANコード、カテゴリで検索...">
+                <select class="filter-select">
+                    <option>カテゴリ選択</option>
+                    <option>衣料品</option>
+                    <option>食品</option>
+                    <option>家電</option>
+                    <option>雑貨</option>
+                </select>
+                <select class="filter-select">
+                    <option>在庫レベル</option>
+                    <option>在庫充分</option>
+                    <option>要注意</option>
+                    <option>要補充</option>
+                </select>
+            </div>
+
+            <div class="inventory-grid">
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-name">プレミアムTシャツ（白）</div>
+                        <span class="stock-level stock-high">在庫充分</span>
+                    </div>
+                    <div class="product-details">
+                        <div class="detail-row">
+                            <span class="detail-label">JANコード:</span>
+                            <span class="detail-value">4901234567890</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫数:</span>
+                            <span class="detail-value">145個</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">販売価格:</span>
+                            <span class="detail-value price">¥2,980</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">今月売上:</span>
+                            <span class="detail-value">89個</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-small btn-primary" onclick="viewProduct('T001')">詳細</button>
+                        <button class="btn-small btn-success" onclick="updateStock('T001')">更新</button>
+                        <button class="btn-small btn-warning" onclick="orderStock('T001')">発注</button>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-name">有機野菜ジュース 1L</div>
+                        <span class="stock-level stock-medium">要注意</span>
+                    </div>
+                    <div class="product-details">
+                        <div class="detail-row">
+                            <span class="detail-label">JANコード:</span>
+                            <span class="detail-value">4901234567891</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫数:</span>
+                            <span class="detail-value">28個</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">販売価格:</span>
+                            <span class="detail-value price">¥498</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">今月売上:</span>
+                            <span class="detail-value">156個</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-small btn-primary" onclick="viewProduct('F001')">詳細</button>
+                        <button class="btn-small btn-success" onclick="updateStock('F001')">更新</button>
+                        <button class="btn-small btn-warning" onclick="orderStock('F001')">発注</button>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-name">ワイヤレスイヤホン</div>
+                        <span class="stock-level stock-low">要補充</span>
+                    </div>
+                    <div class="product-details">
+                        <div class="detail-row">
+                            <span class="detail-label">JANコード:</span>
+                            <span class="detail-value">4901234567892</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">現在庫数:</span>
+                            <span class="detail-value">3個</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">販売価格:</span>
+                            <span class="detail-value price">¥8,980</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">今月売上:</span>
+                            <span class="detail-value">42個</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-small btn-primary" onclick="viewProduct('E001')">詳細</button>
+                        <button class="btn-small btn-success" onclick="updateStock('E001')">更新</button>
+                        <button class="btn-small btn-warning" onclick="orderStock('E001')">発注</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-insights">
+            <h2 class="section-title">🤖 AI分析・予測</h2>
+            
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>📈</span>
+                    需要予測アラート
+                </div>
+                <div class="insight-content">
+                    季節要因により、今後2週間でワイヤレスイヤホンの需要が40%増加する予測です。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 60個の追加発注を推奨します。
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>💡</span>
+                    在庫最適化提案
+                </div>
+                <div class="insight-content">
+                    プレミアムTシャツの在庫回転が遅くなっています。価格調整または販促を検討してください。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 15%の期間限定割引を推奨します。
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">
+                    <span>⚡</span>
+                    急速売上増加商品
+                </div>
+                <div class="insight-content">
+                    有機野菜ジュースの売上が先週比150%増加しています。
+                    <div class="recommendation">
+                        <strong>推奨アクション:</strong> 緊急補充発注を推奨します。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sales-analytics">
+            <h2 class="section-title">📊 売上分析</h2>
+            <div class="chart-container">
+                <h3>📈 売上トレンド分析</h3>
+                <p>リアルタイム売上データとAI予測</p>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2 class="section-title">🔔 通知・アラート</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-title">在庫不足警告</div>
+                    <div>ワイヤレスイヤホンの在庫が最小レベルに達しました。</div>
+                    <div class="alert-time">5分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">📦</div>
+                <div class="alert-content">
+                    <div class="alert-title">入荷予定</div>
+                    <div>有機野菜ジュース 100個が明日入荷予定です。</div>
+                    <div class="alert-time">30分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">💰</div>
+                <div class="alert-content">
+                    <div class="alert-title">売上目標達成</div>
+                    <div>本日の売上が目標の105%に達しました。</div>
+                    <div class="alert-time">1時間前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-panel">
+            <h2 class="section-title">🎛️ 店舗管理</h2>
+            
+            <div class="message-box">
+                <h3>📱 店舗連絡</h3>
+                <textarea class="message-input" placeholder="在庫や売上に関する連絡事項を入力してください..."></textarea>
+                <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="generateOrder()">📋 自動発注実行</button>
+                <button class="btn" onclick="priceOptimization()">💰 価格最適化</button>
+                <button class="btn" onclick="salesReport()">📊 売上レポート</button>
+                <button class="btn" onclick="inventoryAudit()">🔍 棚卸し開始</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを店舗スタッフに送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function viewProduct(productId) {
+            alert(`商品 ${productId} の詳細情報を表示します。`);
+        }
+
+        function updateStock(productId) {
+            const newStock = prompt(`商品 ${productId} の新しい在庫数を入力してください:`);
+            if (newStock && !isNaN(newStock)) {
+                alert(`商品 ${productId} の在庫を ${newStock} 個に更新しました。`);
+            }
+        }
+
+        function orderStock(productId) {
+            if (confirm(`商品 ${productId} の発注を実行しますか？`)) {
+                alert(`商品 ${productId} の発注を実行しました。`);
+            }
+        }
+
+        function generateOrder() {
+            alert('AI分析に基づく自動発注を実行します。');
+        }
+
+        function priceOptimization() {
+            alert('AI価格最適化を実行します。競合分析と需要予測に基づいて最適価格を提案します。');
+        }
+
+        function salesReport() {
+            alert('詳細な売上レポートを生成します。');
+        }
+
+        function inventoryAudit() {
+            if (confirm('棚卸しを開始しますか？在庫管理システムが一時的に制限されます。')) {
+                alert('棚卸しモードを開始しました。');
+            }
+        }
+
+        // リアルタイム在庫更新のシミュレーション
+        function updateMetrics() {
+            const metricValues = document.querySelectorAll('.metric-value');
+            // 要補充商品数をランダムに変動
+            metricValues[2].textContent = Math.floor(Math.random() * 10) + 20;
+        }
+
+        // 30秒ごとに在庫メトリクスを更新
+        setInterval(updateMetrics, 30000);
+    </script>
+</body>
+</html>

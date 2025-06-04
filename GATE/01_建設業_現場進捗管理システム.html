@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマート建設現場 - リアルタイム進捗管理ダッシュボード</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .progress-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 30px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .task-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .task-item {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .task-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .progress-section, .action-buttons {
+                padding: 20px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ スマート建設現場</h1>
+            <div class="subtitle">リアルタイム進捗管理ダッシュボード</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">73%</div>
+                <div class="stat-label">総合進捗率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">作業中のタスク</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">45</div>
+                <div class="stat-label">稼働中の作業員</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">使用中の重機</div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h2 class="section-title">📊 工程別進捗状況</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <strong>基礎工事</strong>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%;">完了</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <strong>躯体工事</strong>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%;">85%</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <strong>内装工事</strong>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%;">45%</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <strong>外装工事</strong>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 20%;">20%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-list">
+            <h2 class="section-title">📋 本日のタスク</h2>
+            
+            <div class="task-item">
+                <div>
+                    <strong>2階床コンクリート打設</strong><br>
+                    <small>担当: 田中チーム</small>
+                </div>
+                <span class="task-status status-progress">作業中</span>
+            </div>
+
+            <div class="task-item">
+                <div>
+                    <strong>配管設備検査</strong><br>
+                    <small>担当: 設備班</small>
+                </div>
+                <span class="task-status status-completed">完了</span>
+            </div>
+
+            <div class="task-item">
+                <div>
+                    <strong>資材搬入（鉄筋）</strong><br>
+                    <small>担当: 資材管理</small>
+                </div>
+                <span class="task-status status-pending">待機中</span>
+            </div>
+        </div>
+
+        <div class="message-box">
+            <h3>📱 現場連絡</h3>
+            <textarea class="message-input" placeholder="現場の状況や連絡事項を入力してください..."></textarea>
+            <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="updateProgress()">📈 進捗更新</button>
+            <button class="btn btn-secondary" onclick="viewReports()">📊 レポート確認</button>
+            <button class="btn" onclick="manageResources()">👷 人員管理</button>
+            <button class="btn btn-danger" onclick="emergencyAlert()">🚨 緊急連絡</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function updateProgress() {
+            alert('進捗を更新します。現場の最新状況を反映します。');
+        }
+
+        function viewReports() {
+            alert('詳細レポートを表示します。');
+        }
+
+        function manageResources() {
+            alert('人員管理画面を開きます。');
+        }
+
+        function emergencyAlert() {
+            if (confirm('緊急連絡を送信しますか？')) {
+                alert('緊急連絡を関係者に送信しました。');
+            }
+        }
+
+        // プログレスバーのアニメーション
+        window.addEventListener('load', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>

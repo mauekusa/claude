@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートファクトリー - 統合生産ライン監視システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #34495e 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .production-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .line-status {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .production-line {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .line-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .line-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .line-details {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .line-metrics {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-width: 80px;
+        }
+
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-running {
+            background: #27ae60;
+        }
+
+        .status-warning {
+            background: #f39c12;
+        }
+
+        .status-stopped {
+            background: #e74c3c;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .quality-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .quality-chart {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 20px 0;
+        }
+
+        .alerts-section {
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #f39c12;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #2ecc71;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .production-status {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .production-line {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .line-metrics {
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .control-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 スマートファクトリー</h1>
+            <div class="subtitle">統合生産ライン監視システム</div>
+        </div>
+
+        <div class="production-status">
+            <div class="status-card">
+                <div class="status-value">94%</div>
+                <div class="status-label">稼働率</div>
+            </div>
+            <div class="status-card">
+                <div class="status-value">1,247</div>
+                <div class="status-label">本日の生産数</div>
+            </div>
+            <div class="status-card">
+                <div class="status-value">99.2%</div>
+                <div class="status-label">品質率</div>
+            </div>
+            <div class="status-card">
+                <div class="status-value">2</div>
+                <div class="status-label">アラート件数</div>
+            </div>
+        </div>
+
+        <div class="line-status">
+            <h2 class="section-title">🔧 生産ライン状況</h2>
+            
+            <div class="production-line">
+                <div class="line-info">
+                    <div class="line-name">
+                        <span class="status-indicator status-running"></span>
+                        ライン A - 主力製品
+                    </div>
+                    <div class="line-details">稼働時間: 7時間 32分 | 担当: 製造1班</div>
+                </div>
+                <div class="line-metrics">
+                    <div class="metric">
+                        <div class="metric-value">156</div>
+                        <div class="metric-label">時間産出</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">98.5%</div>
+                        <div class="metric-label">効率</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">65°C</div>
+                        <div class="metric-label">温度</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="production-line">
+                <div class="line-info">
+                    <div class="line-name">
+                        <span class="status-indicator status-warning"></span>
+                        ライン B - 特注製品
+                    </div>
+                    <div class="line-details">稼働時間: 6時間 15分 | 担当: 製造2班</div>
+                </div>
+                <div class="line-metrics">
+                    <div class="metric">
+                        <div class="metric-value">89</div>
+                        <div class="metric-label">時間産出</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">85.2%</div>
+                        <div class="metric-label">効率</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">72°C</div>
+                        <div class="metric-label">温度</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="production-line">
+                <div class="line-info">
+                    <div class="line-name">
+                        <span class="status-indicator status-running"></span>
+                        ライン C - 梱包・出荷
+                    </div>
+                    <div class="line-details">稼働時間: 8時間 05分 | 担当: 梱包班</div>
+                </div>
+                <div class="line-metrics">
+                    <div class="metric">
+                        <div class="metric-value">234</div>
+                        <div class="metric-label">時間処理</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">96.8%</div>
+                        <div class="metric-label">効率</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">正常</div>
+                        <div class="metric-label">状態</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quality-section">
+            <h2 class="section-title">📊 品質管理</h2>
+            <div class="quality-chart">
+                <h3>品質トレンド</h3>
+                <div class="chart-placeholder">
+                    📈 リアルタイム品質データ表示エリア
+                </div>
+                <p>過去24時間の品質データを表示中</p>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2 class="section-title">🚨 アラート・通知</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-title">ライン B - 温度異常</div>
+                    <div>設定温度を超過しています。確認が必要です。</div>
+                    <div class="alert-time">10分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">🔧</div>
+                <div class="alert-content">
+                    <div class="alert-title">定期メンテナンス予定</div>
+                    <div>ライン A の定期メンテナンスが明日予定されています。</div>
+                    <div class="alert-time">2時間前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">🎛️ 制御パネル</h2>
+            
+            <div class="message-box">
+                <h3>📱 製造現場連絡</h3>
+                <textarea class="message-input" placeholder="製造ラインの状況や連絡事項を入力してください..."></textarea>
+                <button class="btn btn-success" onclick="sendMessage()">メッセージ送信</button>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn" onclick="viewDetailedReport()">📋 詳細レポート</button>
+                <button class="btn btn-success" onclick="startProduction()">▶️ 生産開始</button>
+                <button class="btn btn-warning" onclick="pauseProduction()">⏸️ 一時停止</button>
+                <button class="btn btn-danger" onclick="emergencyStop()">🛑 緊急停止</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを製造現場に送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function viewDetailedReport() {
+            alert('詳細な生産レポートを表示します。');
+        }
+
+        function startProduction() {
+            if (confirm('生産を開始しますか？')) {
+                alert('生産ラインを開始しました。');
+            }
+        }
+
+        function pauseProduction() {
+            if (confirm('生産を一時停止しますか？')) {
+                alert('生産ラインを一時停止しました。');
+            }
+        }
+
+        function emergencyStop() {
+            if (confirm('緊急停止を実行しますか？この操作は即座に全ラインを停止します。')) {
+                alert('緊急停止を実行しました。安全確認後に再開してください。');
+            }
+        }
+
+        // リアルタイムデータ更新のシミュレーション
+        function updateMetrics() {
+            const metrics = document.querySelectorAll('.metric-value');
+            metrics.forEach(metric => {
+                if (metric.textContent.includes('%')) {
+                    const baseValue = parseFloat(metric.textContent);
+                    const variation = (Math.random() - 0.5) * 2;
+                    const newValue = Math.max(0, Math.min(100, baseValue + variation));
+                    metric.textContent = newValue.toFixed(1) + '%';
+                }
+            });
+        }
+
+        // 5秒ごとにメトリクスを更新
+        setInterval(updateMetrics, 5000);
+    </script>
+</body>
+</html>

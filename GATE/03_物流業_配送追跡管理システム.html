@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートロジスティクス - リアルタイム配送最適化システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid #e67e22;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .delivery-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .delivery-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .delivery-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .delivery-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .delivery-details {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .delivery-route {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .delivery-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-shipping {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-transit {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-delayed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .eta {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .map-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .map-placeholder {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .vehicle-tracking {
+            padding: 30px;
+        }
+
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .vehicle-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .vehicle-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .vehicle-id {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .vehicle-status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .status-active {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        .status-maintenance {
+            background: #f39c12;
+        }
+
+        .status-offline {
+            background: #e74c3c;
+        }
+
+        .vehicle-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .alerts-section {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #e67e22;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 30px;
+            border-left: 5px solid #e67e22;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #e67e22;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .delivery-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .delivery-status {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .vehicle-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 スマートロジスティクス</h1>
+            <div class="subtitle">リアルタイム配送最適化システム</div>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-value">127</div>
+                <div class="stat-label">配送中</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">89</div>
+                <div class="stat-label">本日完了</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">稼働車両</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">97.3%</div>
+                <div class="stat-label">定時配送率</div>
+            </div>
+        </div>
+
+        <div class="delivery-section">
+            <h2 class="section-title">📦 配送トラッキング</h2>
+            
+            <div class="delivery-item">
+                <div class="delivery-info">
+                    <div class="delivery-id">配送ID: DL-20241204-001</div>
+                    <div class="delivery-details">
+                        顧客: 株式会社ABC商事<br>
+                        配送先: 東京都渋谷区 | 重量: 45kg
+                    </div>
+                    <div class="delivery-route">
+                        🚛 品川倉庫 → 渋谷区配送センター → 顧客先
+                    </div>
+                </div>
+                <div class="delivery-status">
+                    <span class="status-badge status-transit">配送中</span>
+                    <div class="eta">到着予定: 15:30</div>
+                </div>
+            </div>
+
+            <div class="delivery-item">
+                <div class="delivery-info">
+                    <div class="delivery-id">配送ID: DL-20241204-002</div>
+                    <div class="delivery-details">
+                        顧客: 製造業XYZ<br>
+                        配送先: 神奈川県横浜市 | 重量: 120kg
+                    </div>
+                    <div class="delivery-route">
+                        🚛 川崎倉庫 → 横浜配送センター → 顧客先
+                    </div>
+                </div>
+                <div class="delivery-status">
+                    <span class="status-badge status-delivered">配送完了</span>
+                    <div class="eta">完了時刻: 14:15</div>
+                </div>
+            </div>
+
+            <div class="delivery-item">
+                <div class="delivery-info">
+                    <div class="delivery-id">配送ID: DL-20241204-003</div>
+                    <div class="delivery-details">
+                        顧客: 小売店DEF<br>
+                        配送先: 埼玉県さいたま市 | 重量: 78kg
+                    </div>
+                    <div class="delivery-route">
+                        🚛 大宮倉庫 → さいたま配送センター → 顧客先
+                    </div>
+                </div>
+                <div class="delivery-status">
+                    <span class="status-badge status-delayed">遅延</span>
+                    <div class="eta">新到着予定: 17:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-section">
+            <h2 class="section-title">🗺️ リアルタイム配送マップ</h2>
+            <div class="map-placeholder">
+                <div>🗺️ インタラクティブ配送マップ</div>
+                <p>車両位置とルートをリアルタイム表示</p>
+            </div>
+        </div>
+
+        <div class="vehicle-tracking">
+            <h2 class="section-title">🚚 車両管理</h2>
+            
+            <div class="vehicle-grid">
+                <div class="vehicle-card">
+                    <div class="vehicle-header">
+                        <div class="vehicle-id">車両 TR-001</div>
+                        <div class="vehicle-status-dot status-active"></div>
+                    </div>
+                    <div>ドライバー: 田中太郎</div>
+                    <div>現在地: 渋谷区神南</div>
+                    <div class="vehicle-metrics">
+                        <div class="metric">
+                            <div class="metric-value">8/10</div>
+                            <div class="metric-label">積載</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">145km</div>
+                            <div class="metric-label">走行距離</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vehicle-card">
+                    <div class="vehicle-header">
+                        <div class="vehicle-id">車両 TR-002</div>
+                        <div class="vehicle-status-dot status-active"></div>
+                    </div>
+                    <div>ドライバー: 佐藤花子</div>
+                    <div>現在地: 横浜市港北区</div>
+                    <div class="vehicle-metrics">
+                        <div class="metric">
+                            <div class="metric-value">6/12</div>
+                            <div class="metric-label">積載</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">89km</div>
+                            <div class="metric-label">走行距離</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vehicle-card">
+                    <div class="vehicle-header">
+                        <div class="vehicle-id">車両 TR-003</div>
+                        <div class="vehicle-status-dot status-maintenance"></div>
+                    </div>
+                    <div>ステータス: メンテナンス中</div>
+                    <div>場所: 本社車庫</div>
+                    <div class="vehicle-metrics">
+                        <div class="metric">
+                            <div class="metric-value">-</div>
+                            <div class="metric-label">積載</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">-</div>
+                            <div class="metric-label">走行距離</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <h2 class="section-title">🚨 アラート・通知</h2>
+            
+            <div class="alert">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-title">配送遅延発生</div>
+                    <div>DL-20241204-003が交通渋滞により遅延しています。</div>
+                    <div class="alert-time">15分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">📍</div>
+                <div class="alert-content">
+                    <div class="alert-title">ルート最適化完了</div>
+                    <div>TR-001の配送ルートが最適化されました。</div>
+                    <div class="alert-time">30分前</div>
+                </div>
+            </div>
+
+            <div class="alert">
+                <div class="alert-icon">✅</div>
+                <div class="alert-content">
+                    <div class="alert-title">配送完了</div>
+                    <div>DL-20241204-002の配送が正常に完了しました。</div>
+                    <div class="alert-time">45分前</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="message-box">
+            <h3>📱 配送センター連絡</h3>
+            <textarea class="message-input" placeholder="配送に関する連絡事項を入力してください..."></textarea>
+            <button class="btn" onclick="sendMessage()">メッセージ送信</button>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="optimizeRoutes()">🗺️ ルート最適化</button>
+            <button class="btn" onclick="scheduleDelivery()">📅 配送スケジュール</button>
+            <button class="btn btn-success" onclick="generateReport()">📊 配送レポート</button>
+            <button class="btn btn-danger" onclick="emergencyAlert()">🚨 緊急連絡</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.querySelector('.message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを配送センターに送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function optimizeRoutes() {
+            alert('AI配送ルート最適化を実行します。配送効率が向上します。');
+        }
+
+        function scheduleDelivery() {
+            alert('配送スケジュール管理画面を開きます。');
+        }
+
+        function generateReport() {
+            alert('配送実績レポートを生成します。');
+        }
+
+        function emergencyAlert() {
+            if (confirm('緊急連絡を送信しますか？')) {
+                alert('緊急連絡を全ドライバーと配送センターに送信しました。');
+            }
+        }
+
+        // リアルタイム更新のシミュレーション
+        function updateDeliveryStatus() {
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues[0].textContent = Math.floor(Math.random() * 10) + 120; // 配送中
+            statValues[1].textContent = Math.floor(Math.random() * 5) + 87;   // 本日完了
+        }
+
+        // 10秒ごとに配送状況を更新
+        setInterval(updateDeliveryStatus, 10000);
+    </script>
+</body>
+</html>
