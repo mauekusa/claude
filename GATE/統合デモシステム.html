@@ -280,6 +280,29 @@
             background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
 
+        .bottom-back-button {
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            display: block;
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .bottom-back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+        }
+
         .message-box {
             background: white;
             border-radius: 15px;
@@ -561,6 +584,8 @@
                 <button class="btn" onclick="manageResources('construction')">👷 人員管理</button>
                 <button class="btn btn-danger" onclick="emergencyAlert('construction')">🚨 緊急連絡</button>
             </div>
+            
+            <button class="bottom-back-button" onclick="showMenu()">← メニューに戻る</button>
         </div>
 
         <!-- 医療業デモ -->
@@ -627,6 +652,8 @@
                 <button class="btn" onclick="manageResources('medical')">👩‍⚕️ スタッフ管理</button>
                 <button class="btn btn-danger" onclick="emergencyAlert('medical')">🚨 緊急コール</button>
             </div>
+            
+            <button class="bottom-back-button" onclick="showMenu()">← メニューに戻る</button>
         </div>
 
         <!-- 製造業デモ -->
@@ -693,6 +720,8 @@
                 <button class="btn" onclick="manageResources('manufacturing')">⚙️ 設備管理</button>
                 <button class="btn btn-danger" onclick="emergencyAlert('manufacturing')">🛑 緊急停止</button>
             </div>
+            
+            <button class="bottom-back-button" onclick="showMenu()">← メニューに戻る</button>
         </div>
 
         <!-- その他のデモページも同様に追加... -->
@@ -747,6 +776,9 @@
             if (targetPage) {
                 targetPage.classList.add('active');
                 currentDemo = demoType;
+                
+                // ページの一番上にスクロール
+                window.scrollTo(0, 0);
                 
                 // リアルタイム更新を開始
                 startRealTimeUpdate(demoType);
@@ -1013,6 +1045,8 @@
                         <button class="btn" onclick="manageResources('${demoType}')">⚙️ 管理画面</button>
                         <button class="btn btn-danger" onclick="emergencyAlert('${demoType}')">🚨 緊急通知</button>
                     </div>
+                    
+                    <button class="bottom-back-button" onclick="showMenu()">← メニューに戻る</button>
                 </div>
             `;
 
