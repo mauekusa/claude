@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart at GATE - 統合デモシステム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: calc(100vh - 40px);
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* メニューページのスタイル */
+        .menu-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .menu-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            margin: -20px -20px 40px -20px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .menu-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .menu-header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .menu-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .menu-stat {
+            text-align: center;
+        }
+
+        .menu-stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .menu-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .demo-category {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .demo-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .demo-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .demo-subtitle {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+
+        /* デモページ共通スタイル */
+        .demo-header {
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .demo-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .demo-header .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .demo-content {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 30px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+                min-height: calc(100vh - 20px);
+            }
+
+            .menu-header {
+                padding: 30px 15px;
+                margin: -15px -15px 30px -15px;
+            }
+
+            .menu-header h1 {
+                font-size: 2rem;
+            }
+
+            .menu-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .demo-grid {
+                grid-template-columns: 1fr;
+                padding: 0 15px;
+            }
+
+            .demo-header h1 {
+                font-size: 1.4rem;
+                margin-right: 60px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .demo-content, .action-buttons {
+                padding: 20px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .back-button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 業種別カラーテーマ */
+        .construction { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); }
+        .manufacturing { background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); }
+        .logistics { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
+        .retail { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .medical { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); }
+        .education { background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); }
+        .agriculture { background: linear-gradient(135deg, #00b894 0%, #55a3ff 100%); }
+        .realestate { background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); }
+        .finance { background: linear-gradient(135deg, #2d3436 0%, #636e72 100%); }
+        .restaurant { background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); }
+
+        .construction .progress-fill { background: linear-gradient(90deg, #2980b9, #3498db); }
+        .manufacturing .progress-fill { background: linear-gradient(90deg, #8e44ad, #9b59b6); }
+        .logistics .progress-fill { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+        .retail .progress-fill { background: linear-gradient(90deg, #f39c12, #e67e22); }
+        .medical .progress-fill { background: linear-gradient(90deg, #00b894, #00cec9); }
+        .education .progress-fill { background: linear-gradient(90deg, #6c5ce7, #a29bfe); }
+        .agriculture .progress-fill { background: linear-gradient(90deg, #00b894, #55a3ff); }
+        .realestate .progress-fill { background: linear-gradient(90deg, #fd79a8, #fdcb6e); }
+        .finance .progress-fill { background: linear-gradient(90deg, #2d3436, #636e72); }
+        .restaurant .progress-fill { background: linear-gradient(90deg, #fd79a8, #e84393); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- メニューページ -->
+        <div id="menu-page" class="page active menu-page">
+            <div class="menu-header">
+                <h1>🚀 Smart at GATE</h1>
+                <div class="subtitle">統合デモシステム - 全業種カスタムアプリデモ</div>
+                <div class="menu-stats">
+                    <div class="menu-stat">
+                        <span class="menu-stat-number">15</span>
+                        <span class="menu-stat-label">デモシステム</span>
+                    </div>
+                    <div class="menu-stat">
+                        <span class="menu-stat-number">10</span>
+                        <span class="menu-stat-label">業種カバー</span>
+                    </div>
+                    <div class="menu-stat">
+                        <span class="menu-stat-number">5</span>
+                        <span class="menu-stat-label">建設業特化</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-category">
+                <h2 class="category-title">📋 基本業種別デモ（10種類）</h2>
+                <div class="demo-grid">
+                    <div class="demo-card" onclick="showDemo('construction')">
+                        <span class="demo-icon">🏗️</span>
+                        <div class="demo-title">建設業</div>
+                        <div class="demo-subtitle">現場進捗管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('manufacturing')">
+                        <span class="demo-icon">🏭</span>
+                        <div class="demo-title">製造業</div>
+                        <div class="demo-subtitle">生産ライン監視システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('logistics')">
+                        <span class="demo-icon">🚛</span>
+                        <div class="demo-title">物流業</div>
+                        <div class="demo-subtitle">配送追跡管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('retail')">
+                        <span class="demo-icon">🏪</span>
+                        <div class="demo-title">小売業</div>
+                        <div class="demo-subtitle">在庫管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('medical')">
+                        <span class="demo-icon">🏥</span>
+                        <div class="demo-title">医療業</div>
+                        <div class="demo-subtitle">患者情報管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('education')">
+                        <span class="demo-icon">🎓</span>
+                        <div class="demo-title">教育業</div>
+                        <div class="demo-subtitle">学習進捗管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('agriculture')">
+                        <span class="demo-icon">🌾</span>
+                        <div class="demo-title">農業</div>
+                        <div class="demo-subtitle">作物生育管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('realestate')">
+                        <span class="demo-icon">🏠</span>
+                        <div class="demo-title">不動産業</div>
+                        <div class="demo-subtitle">物件管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('finance')">
+                        <span class="demo-icon">💹</span>
+                        <div class="demo-title">金融業</div>
+                        <div class="demo-subtitle">取引監視システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('restaurant')">
+                        <span class="demo-icon">🍽️</span>
+                        <div class="demo-title">飲食業</div>
+                        <div class="demo-subtitle">注文在庫管理システム</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-category">
+                <h2 class="category-title">🏗️ 建設業特化デモ（5種類）</h2>
+                <div class="demo-grid">
+                    <div class="demo-card" onclick="showDemo('bim')">
+                        <span class="demo-icon">📐</span>
+                        <div class="demo-title">BIM設計統合管理</div>
+                        <div class="demo-subtitle">3D設計・協業システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('procurement')">
+                        <span class="demo-icon">📦</span>
+                        <div class="demo-title">資材調達・SCM管理</div>
+                        <div class="demo-subtitle">サプライチェーン最適化</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('equipment')">
+                        <span class="demo-icon">🚜</span>
+                        <div class="demo-title">重機稼働監視</div>
+                        <div class="demo-subtitle">IoT機械管理システム</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('quality')">
+                        <span class="demo-icon">✅</span>
+                        <div class="demo-title">施工品質検査</div>
+                        <div class="demo-subtitle">デジタル品質管理</div>
+                    </div>
+                    <div class="demo-card" onclick="showDemo('customer')">
+                        <span class="demo-icon">🤝</span>
+                        <div class="demo-title">顧客契約管理</div>
+                        <div class="demo-subtitle">CRM・営業支援システム</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 建設業デモ -->
+        <div id="construction-page" class="page">
+            <div class="demo-header construction">
+                <button class="back-button" onclick="showMenu()">← 戻る</button>
+                <h1>🏗️ スマート建設現場</h1>
+                <div class="subtitle">リアルタイム進捗管理ダッシュボード</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-progress">73%</div>
+                    <div class="stat-label">総合進捗率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-tasks">12</div>
+                    <div class="stat-label">作業中のタスク</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-workers">45</div>
+                    <div class="stat-label">稼働中の作業員</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-machines">3</div>
+                    <div class="stat-label">使用中の重機</div>
+                </div>
+            </div>
+
+            <div class="demo-content">
+                <h2 class="section-title">📊 工程別進捗状況</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong>基礎工事</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill construction" style="width: 100%;">完了</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>躯体工事</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill construction" style="width: 85%;">85%</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>内装工事</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill construction" style="width: 45%;">45%</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>外装工事</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill construction" style="width: 20%;">20%</div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 現場連絡</h3>
+                    <textarea class="message-input" placeholder="現場の状況や連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="sendMessage('construction')">メッセージ送信</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="updateData('construction')">📈 進捗更新</button>
+                <button class="btn btn-secondary" onclick="viewReports('construction')">📊 レポート確認</button>
+                <button class="btn" onclick="manageResources('construction')">👷 人員管理</button>
+                <button class="btn btn-danger" onclick="emergencyAlert('construction')">🚨 緊急連絡</button>
+            </div>
+        </div>
+
+        <!-- 医療業デモ -->
+        <div id="medical-page" class="page">
+            <div class="demo-header medical">
+                <button class="back-button" onclick="showMenu()">← 戻る</button>
+                <h1>🏥 スマートホスピタル</h1>
+                <div class="subtitle">統合患者ケア管理システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="medical-patients">156</div>
+                    <div class="stat-label">入院患者数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="medical-staff">89</div>
+                    <div class="stat-label">勤務中スタッフ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="medical-surgeries">8</div>
+                    <div class="stat-label">本日の手術予定</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="medical-emergency">2</div>
+                    <div class="stat-label">緊急患者</div>
+                </div>
+            </div>
+
+            <div class="demo-content">
+                <h2 class="section-title">🩺 バイタルサイン監視</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong>ICU - 重篤患者監視</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill medical" style="width: 95%;">正常95%</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>一般病棟 - 患者状態</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill medical" style="width: 88%;">安定88%</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>外来診療 - 待ち時間</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill medical" style="width: 75%;">15分以内</div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 医療スタッフ連絡</h3>
+                    <textarea class="message-input" placeholder="医療スタッフへの連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="sendMessage('medical')">緊急通知送信</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="updateData('medical')">🩺 患者情報更新</button>
+                <button class="btn btn-secondary" onclick="viewReports('medical')">📋 診療記録確認</button>
+                <button class="btn" onclick="manageResources('medical')">👩‍⚕️ スタッフ管理</button>
+                <button class="btn btn-danger" onclick="emergencyAlert('medical')">🚨 緊急コール</button>
+            </div>
+        </div>
+
+        <!-- 製造業デモ -->
+        <div id="manufacturing-page" class="page">
+            <div class="demo-header manufacturing">
+                <button class="back-button" onclick="showMenu()">← 戻る</button>
+                <h1>🏭 スマートファクトリー</h1>
+                <div class="subtitle">統合生産ライン監視システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-efficiency">92%</div>
+                    <div class="stat-label">生産効率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-output">1,247</div>
+                    <div class="stat-label">本日の生産数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-quality">98.5%</div>
+                    <div class="stat-label">品質合格率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-downtime">0.8h</div>
+                    <div class="stat-label">停止時間</div>
+                </div>
+            </div>
+
+            <div class="demo-content">
+                <h2 class="section-title">⚙️ 生産ライン状況</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong>ライン A - 組立工程</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill manufacturing" style="width: 95%;">稼働中95%</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>ライン B - 検査工程</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill manufacturing" style="width: 88%;">稼働中88%</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>ライン C - 包装工程</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill manufacturing" style="width: 92%;">稼働中92%</div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 生産管理連絡</h3>
+                    <textarea class="message-input" placeholder="生産ラインの状況や改善提案を入力してください..."></textarea>
+                    <button class="btn" onclick="sendMessage('manufacturing')">報告送信</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="updateData('manufacturing')">📊 生産データ更新</button>
+                <button class="btn btn-secondary" onclick="viewReports('manufacturing')">📈 効率分析</button>
+                <button class="btn" onclick="manageResources('manufacturing')">⚙️ 設備管理</button>
+                <button class="btn btn-danger" onclick="emergencyAlert('manufacturing')">🛑 緊急停止</button>
+            </div>
+        </div>
+
+        <!-- その他のデモページも同様に追加... -->
+        <!-- 簡略化のため、他のデモページはJavaScriptで動的生成 -->
+
+    </div>
+
+    <script>
+        let currentDemo = 'menu';
+        let updateInterval;
+
+        function showMenu() {
+            // 全ページを非表示
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // メニューページを表示
+            document.getElementById('menu-page').classList.add('active');
+            currentDemo = 'menu';
+            
+            // 更新を停止
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        }
+
+        function showDemo(demoType) {
+            // 全ページを非表示
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            let pageId;
+            switch(demoType) {
+                case 'construction':
+                    pageId = 'construction-page';
+                    break;
+                case 'medical':
+                    pageId = 'medical-page';
+                    break;
+                case 'manufacturing':
+                    pageId = 'manufacturing-page';
+                    break;
+                default:
+                    // 他のデモは動的に生成
+                    createDemoPage(demoType);
+                    pageId = demoType + '-page';
+            }
+            
+            let targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                currentDemo = demoType;
+                
+                // リアルタイム更新を開始
+                startRealTimeUpdate(demoType);
+            }
+        }
+
+        function createDemoPage(demoType) {
+            // 既存のページがあれば削除
+            const existingPage = document.getElementById(demoType + '-page');
+            if (existingPage) {
+                existingPage.remove();
+            }
+
+            const demoConfigs = {
+                'logistics': {
+                    icon: '🚛',
+                    title: 'スマートロジスティクス',
+                    subtitle: 'リアルタイム配送最適化システム',
+                    className: 'logistics',
+                    stats: [
+                        { id: 'vehicles', value: '87', label: '稼働中車両' },
+                        { id: 'deliveries', value: '234', label: '本日配送完了' },
+                        { id: 'efficiency', value: '94%', label: '配送効率' },
+                        { id: 'delays', value: '3', label: '遅延件数' }
+                    ],
+                    progressBars: [
+                        { label: 'ルート A - 都市部配送', width: '92%' },
+                        { label: 'ルート B - 郊外配送', width: '85%' },
+                        { label: 'ルート C - 長距離配送', width: '78%' }
+                    ]
+                },
+                'retail': {
+                    icon: '🏪',
+                    title: 'スマートリテール',
+                    subtitle: 'AI連携在庫最適化システム',
+                    className: 'retail',
+                    stats: [
+                        { id: 'sales', value: '¥1.2M', label: '本日売上' },
+                        { id: 'customers', value: '456', label: '来店客数' },
+                        { id: 'inventory', value: '89%', label: '在庫充足率' },
+                        { id: 'shortage', value: '12', label: '欠品アイテム' }
+                    ],
+                    progressBars: [
+                        { label: '食品カテゴリ - 在庫状況', width: '95%' },
+                        { label: '日用品カテゴリ - 在庫状況', width: '82%' },
+                        { label: '衣料品カテゴリ - 在庫状況', width: '76%' }
+                    ]
+                },
+                'education': {
+                    icon: '🎓',
+                    title: 'スマートラーニング',
+                    subtitle: 'AI個別最適化教育システム',
+                    className: 'education',
+                    stats: [
+                        { id: 'students', value: '342', label: '在籍生徒数' },
+                        { id: 'courses', value: '28', label: '開講コース' },
+                        { id: 'completion', value: '87%', label: 'コース完了率' },
+                        { id: 'satisfaction', value: '4.8', label: '満足度評価' }
+                    ],
+                    progressBars: [
+                        { label: '数学コース - 進捗状況', width: '89%' },
+                        { label: '英語コース - 進捗状況', width: '76%' },
+                        { label: 'プログラミングコース - 進捗状況', width: '82%' }
+                    ]
+                },
+                'agriculture': {
+                    icon: '🌾',
+                    title: 'スマートアグリ',
+                    subtitle: 'IoT連携精密農業管理システム',
+                    className: 'agriculture',
+                    stats: [
+                        { id: 'fields', value: '15', label: '管理圃場数' },
+                        { id: 'yield', value: '125%', label: '収穫予測' },
+                        { id: 'moisture', value: '68%', label: '土壌水分' },
+                        { id: 'weather', value: '晴れ', label: '天候状況' }
+                    ],
+                    progressBars: [
+                        { label: '圃場 A - 作物生育状況', width: '92%' },
+                        { label: '圃場 B - 作物生育状況', width: '87%' },
+                        { label: '圃場 C - 作物生育状況', width: '94%' }
+                    ]
+                },
+                'realestate': {
+                    icon: '🏠',
+                    title: 'スマートプロパティ',
+                    subtitle: '統合不動産管理プラットフォーム',
+                    className: 'realestate',
+                    stats: [
+                        { id: 'properties', value: '89', label: '管理物件数' },
+                        { id: 'occupancy', value: '94%', label: '稼働率' },
+                        { id: 'revenue', value: '¥2.8M', label: '月間収益' },
+                        { id: 'maintenance', value: '7', label: '保守案件' }
+                    ],
+                    progressBars: [
+                        { label: 'マンションA - 稼働状況', width: '96%' },
+                        { label: 'オフィスB - 稼働状況', width: '89%' },
+                        { label: '商業施設C - 稼働状況', width: '92%' }
+                    ]
+                },
+                'finance': {
+                    icon: '💹',
+                    title: 'スマートトレーディング',
+                    subtitle: 'AI取引監視・リスク管理システム',
+                    className: 'finance',
+                    stats: [
+                        { id: 'portfolio', value: '¥45.2B', label: 'ポートフォリオ' },
+                        { id: 'risk', value: '2.3%', label: 'リスク指標' },
+                        { id: 'return', value: '+8.7%', label: '年間リターン' },
+                        { id: 'alerts', value: '5', label: 'アラート件数' }
+                    ],
+                    progressBars: [
+                        { label: '株式ポートフォリオ - 構成比', width: '65%' },
+                        { label: '債券ポートフォリオ - 構成比', width: '25%' },
+                        { label: '代替投資 - 構成比', width: '10%' }
+                    ]
+                },
+                'restaurant': {
+                    icon: '🍽️',
+                    title: 'スマートレストラン',
+                    subtitle: 'AI連携店舗運営最適化システム',
+                    className: 'restaurant',
+                    stats: [
+                        { id: 'orders', value: '127', label: '本日注文数' },
+                        { id: 'revenue', value: '¥184K', label: '本日売上' },
+                        { id: 'tables', value: '18/24', label: 'テーブル稼働' },
+                        { id: 'kitchen', value: '6min', label: '平均調理時間' }
+                    ],
+                    progressBars: [
+                        { label: 'キッチン効率 - 調理進行', width: '88%' },
+                        { label: '在庫充足率 - 食材管理', width: '92%' },
+                        { label: '顧客満足度 - サービス品質', width: '95%' }
+                    ]
+                },
+                // 建設業特化デモ
+                'bim': {
+                    icon: '📐',
+                    title: 'BIM設計統合管理',
+                    subtitle: '3D設計・協業システム',
+                    className: 'construction',
+                    stats: [
+                        { id: 'projects', value: '12', label: '進行プロジェクト' },
+                        { id: 'designers', value: '8', label: '稼働設計者' },
+                        { id: 'models', value: '47', label: 'BIMモデル数' },
+                        { id: 'conflicts', value: '3', label: '干渉チェック' }
+                    ],
+                    progressBars: [
+                        { label: 'プロジェクトA - 設計進捗', width: '78%' },
+                        { label: 'プロジェクトB - 設計進捗', width: '92%' },
+                        { label: 'プロジェクトC - 設計進捗', width: '65%' }
+                    ]
+                },
+                'procurement': {
+                    icon: '📦',
+                    title: '資材調達・SCM管理',
+                    subtitle: 'サプライチェーン最適化',
+                    className: 'construction',
+                    stats: [
+                        { id: 'suppliers', value: '23', label: '登録サプライヤー' },
+                        { id: 'orders', value: '45', label: '進行中注文' },
+                        { id: 'delivery', value: '94%', label: '納期遵守率' },
+                        { id: 'cost', value: '-8%', label: 'コスト削減' }
+                    ],
+                    progressBars: [
+                        { label: 'コンクリート - 在庫状況', width: '89%' },
+                        { label: '鉄筋 - 在庫状況', width: '76%' },
+                        { label: '木材 - 在庫状況', width: '92%' }
+                    ]
+                },
+                'equipment': {
+                    icon: '🚜',
+                    title: '重機稼働監視',
+                    subtitle: 'IoT機械管理システム',
+                    className: 'construction',
+                    stats: [
+                        { id: 'machines', value: '15', label: '監視対象重機' },
+                        { id: 'operating', value: '12', label: '稼働中' },
+                        { id: 'efficiency', value: '87%', label: '稼働効率' },
+                        { id: 'maintenance', value: '2', label: '保守予定' }
+                    ],
+                    progressBars: [
+                        { label: 'ショベルカー - 稼働状況', width: '92%' },
+                        { label: 'ダンプトラック - 稼働状況', width: '85%' },
+                        { label: 'クレーン - 稼働状況', width: '78%' }
+                    ]
+                },
+                'quality': {
+                    icon: '✅',
+                    title: '施工品質検査',
+                    subtitle: 'デジタル品質管理',
+                    className: 'construction',
+                    stats: [
+                        { id: 'inspections', value: '34', label: '本日検査数' },
+                        { id: 'passed', value: '31', label: '合格数' },
+                        { id: 'defects', value: '3', label: '不適合件数' },
+                        { id: 'quality', value: '91%', label: '品質スコア' }
+                    ],
+                    progressBars: [
+                        { label: 'コンクリート品質 - 検査進捗', width: '95%' },
+                        { label: '鉄筋配筋 - 検査進捗', width: '88%' },
+                        { label: '防水工事 - 検査進捗', width: '76%' }
+                    ]
+                },
+                'customer': {
+                    icon: '🤝',
+                    title: '顧客契約管理',
+                    subtitle: 'CRM・営業支援システム',
+                    className: 'construction',
+                    stats: [
+                        { id: 'leads', value: '23', label: '商談件数' },
+                        { id: 'contracts', value: '8', label: '契約件数' },
+                        { id: 'revenue', value: '¥45M', label: '受注金額' },
+                        { id: 'satisfaction', value: '4.6', label: '顧客満足度' }
+                    ],
+                    progressBars: [
+                        { label: '営業パイプライン - 進捗', width: '78%' },
+                        { label: '契約履行率 - 進捗', width: '92%' },
+                        { label: '顧客フォローアップ - 進捗', width: '85%' }
+                    ]
+                }
+            };
+
+            const config = demoConfigs[demoType];
+            if (!config) return;
+
+            const pageHTML = `
+                <div id="${demoType}-page" class="page">
+                    <div class="demo-header ${config.className}">
+                        <button class="back-button" onclick="showMenu()">← 戻る</button>
+                        <h1>${config.icon} ${config.title}</h1>
+                        <div class="subtitle">${config.subtitle}</div>
+                    </div>
+
+                    <div class="stats-grid">
+                        ${config.stats.map(stat => `
+                            <div class="stat-card">
+                                <div class="stat-value" id="${demoType}-${stat.id}">${stat.value}</div>
+                                <div class="stat-label">${stat.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="demo-content">
+                        <h2 class="section-title">📊 リアルタイム監視状況</h2>
+                        
+                        ${config.progressBars.map(bar => `
+                            <div style="margin-bottom: 20px;">
+                                <strong>${bar.label}</strong>
+                                <div class="progress-bar">
+                                    <div class="progress-fill ${config.className}" style="width: ${bar.width};">${bar.width}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+
+                        <div class="message-box">
+                            <h3>📱 連絡・報告</h3>
+                            <textarea class="message-input" placeholder="状況報告や連絡事項を入力してください..."></textarea>
+                            <button class="btn" onclick="sendMessage('${demoType}')">メッセージ送信</button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn" onclick="updateData('${demoType}')">📈 データ更新</button>
+                        <button class="btn btn-secondary" onclick="viewReports('${demoType}')">📊 詳細レポート</button>
+                        <button class="btn" onclick="manageResources('${demoType}')">⚙️ 管理画面</button>
+                        <button class="btn btn-danger" onclick="emergencyAlert('${demoType}')">🚨 緊急通知</button>
+                    </div>
+                </div>
+            `;
+
+            document.querySelector('.container').insertAdjacentHTML('beforeend', pageHTML);
+        }
+
+        function startRealTimeUpdate(demoType) {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+
+            updateInterval = setInterval(() => {
+                updateRealTimeData(demoType);
+            }, 3000);
+        }
+
+        function updateRealTimeData(demoType) {
+            const elements = document.querySelectorAll(`#${demoType}-page .stat-value`);
+            elements.forEach(element => {
+                if (element.textContent.includes('%')) {
+                    const currentValue = parseInt(element.textContent);
+                    const variation = Math.floor(Math.random() * 6) - 3;
+                    const newValue = Math.max(0, Math.min(100, currentValue + variation));
+                    element.textContent = newValue + '%';
+                } else if (element.textContent.includes('¥')) {
+                    // 金額の場合は小幅変動
+                    const text = element.textContent;
+                    if (text.includes('K')) {
+                        const currentValue = parseInt(text.replace('¥', '').replace('K', ''));
+                        const variation = Math.floor(Math.random() * 21) - 10;
+                        element.textContent = `¥${currentValue + variation}K`;
+                    } else if (text.includes('M')) {
+                        const currentValue = parseFloat(text.replace('¥', '').replace('M', ''));
+                        const variation = (Math.random() * 0.4) - 0.2;
+                        element.textContent = `¥${(currentValue + variation).toFixed(1)}M`;
+                    }
+                } else if (!isNaN(parseInt(element.textContent))) {
+                    const currentValue = parseInt(element.textContent);
+                    const variation = Math.floor(Math.random() * 6) - 3;
+                    const newValue = Math.max(0, currentValue + variation);
+                    element.textContent = newValue;
+                }
+            });
+        }
+
+        function sendMessage(demoType) {
+            const messageInput = document.querySelector(`#${demoType}-page .message-input`);
+            const message = messageInput ? messageInput.value.trim() : '';
+            
+            if (message) {
+                alert(`${getDemoName(demoType)}へメッセージを送信しました:\n${message}`);
+                if (messageInput) messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function updateData(demoType) {
+            alert(`${getDemoName(demoType)}のデータを更新します。最新情報を反映します。`);
+        }
+
+        function viewReports(demoType) {
+            alert(`${getDemoName(demoType)}の詳細レポートを表示します。`);
+        }
+
+        function manageResources(demoType) {
+            alert(`${getDemoName(demoType)}の管理画面を開きます。`);
+        }
+
+        function emergencyAlert(demoType) {
+            if (confirm(`${getDemoName(demoType)}で緊急通知を送信しますか？`)) {
+                alert('緊急通知を関係者に送信しました。');
+            }
+        }
+
+        function getDemoName(demoType) {
+            const names = {
+                'construction': '建設現場',
+                'medical': '医療施設',
+                'manufacturing': '製造工場',
+                'logistics': '物流センター',
+                'retail': '小売店舗',
+                'education': '教育機関',
+                'agriculture': '農業圃場',
+                'realestate': '不動産管理',
+                'finance': '金融システム',
+                'restaurant': '飲食店舗',
+                'bim': 'BIM設計',
+                'procurement': '資材調達',
+                'equipment': '重機管理',
+                'quality': '品質検査',
+                'customer': '顧客管理'
+            };
+            return names[demoType] || 'システム';
+        }
+
+        // ページロード時のアニメーション
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.demo-card');
+                cards.forEach((card, index) => {
+                    card.style.animation = `slideIn 0.6s ease forwards ${index * 0.1}s`;
+                });
+            }, 300);
+        });
+
+        // アニメーション用CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .demo-card {
+                opacity: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
