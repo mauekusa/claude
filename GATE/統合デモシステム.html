@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart at GATE - 統合デモシステム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+
+        .nav-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 5px;
+            padding: 20px 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 200px;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: none;
+        }
+
+        .demo-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            text-align: center;
+            padding: 80px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .welcome-stat {
+            text-align: center;
+        }
+
+        .welcome-stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .welcome-stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Common Demo Styles */
+        .header {
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 15px 20px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .nav-menu.active {
+                display: grid;
+            }
+
+            .main-content {
+                margin-top: 80px;
+                padding: 10px;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .welcome-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Industry-specific color schemes */
+        .demo-construction .header { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .demo-construction .stat-card { border-top: 4px solid #3498db; }
+        .demo-construction .btn { background: linear-gradient(135deg, #3498db, #2980b9); }
+
+        .demo-manufacturing .header { background: linear-gradient(135deg, #1e3c72, #2a5298); }
+        .demo-manufacturing .stat-card { border-top: 4px solid #2ecc71; }
+        .demo-manufacturing .btn { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+
+        .demo-logistics .header { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .demo-logistics .stat-card { border-top: 4px solid #e67e22; }
+        .demo-logistics .btn { background: linear-gradient(135deg, #e67e22, #d35400); }
+
+        .demo-retail .header { background: linear-gradient(135deg, #8e44ad, #3498db); }
+        .demo-retail .stat-card { border-top: 4px solid #8e44ad; }
+        .demo-retail .btn { background: linear-gradient(135deg, #8e44ad, #7d3c98); }
+
+        .demo-healthcare .header { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+        .demo-healthcare .stat-card { border-top: 4px solid #00b894; }
+        .demo-healthcare .btn { background: linear-gradient(135deg, #00b894, #00cec9); }
+
+        .demo-education .header { background: linear-gradient(135deg, #fd79a8, #e84393); }
+        .demo-education .stat-card { border-top: 4px solid #6c5ce7; }
+        .demo-education .btn { background: linear-gradient(135deg, #6c5ce7, #5f3dc4); }
+
+        .demo-agriculture .header { background: linear-gradient(135deg, #00b894, #00cec9); }
+        .demo-agriculture .stat-card { border-top: 4px solid #00b894; }
+        .demo-agriculture .btn { background: linear-gradient(135deg, #00b894, #00a085); }
+
+        .demo-realestate .header { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+        .demo-realestate .stat-card { border-top: 4px solid #a29bfe; }
+        .demo-realestate .btn { background: linear-gradient(135deg, #a29bfe, #8b7cf6); }
+
+        .demo-finance .header { background: linear-gradient(135deg, #2d3436, #636e72); }
+        .demo-finance .stat-card { border-top: 4px solid #00b894; }
+        .demo-finance .btn { background: linear-gradient(135deg, #2d3436, #636e72); }
+
+        .demo-restaurant .header { background: linear-gradient(135deg, #fd79a8, #fdcb6e); }
+        .demo-restaurant .stat-card { border-top: 4px solid #e17055; }
+        .demo-restaurant .btn { background: linear-gradient(135deg, #e17055, #d63031); }
+
+        .demo-bim .header { background: linear-gradient(135deg, #8e44ad, #3498db); }
+        .demo-bim .stat-card { border-top: 4px solid #8e44ad; }
+        .demo-bim .btn { background: linear-gradient(135deg, #8e44ad, #7d3c98); }
+
+        .demo-supply .header { background: linear-gradient(135deg, #e67e22, #f39c12); }
+        .demo-supply .stat-card { border-top: 4px solid #e67e22; }
+        .demo-supply .btn { background: linear-gradient(135deg, #e67e22, #d35400); }
+
+        .demo-equipment .header { background: linear-gradient(135deg, #2c3e50, #34495e); }
+        .demo-equipment .stat-card { border-top: 4px solid #95a5a6; }
+        .demo-equipment .btn { background: linear-gradient(135deg, #2c3e50, #34495e); }
+
+        .demo-quality .header { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .demo-quality .stat-card { border-top: 4px solid #27ae60; }
+        .demo-quality .btn { background: linear-gradient(135deg, #27ae60, #229954); }
+
+        .demo-customer .header { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
+        .demo-customer .stat-card { border-top: 4px solid #8e44ad; }
+        .demo-customer .btn { background: linear-gradient(135deg, #8e44ad, #7d3c98); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <div class="nav-header">
+            <div class="nav-title">🚀 Smart at GATE - 統合デモシステム</div>
+            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        </div>
+        <div class="nav-menu" id="navMenu">
+            <button class="nav-item active" onclick="showDemo('welcome')">🏠 ホーム</button>
+            <button class="nav-item" onclick="showDemo('construction')">🏗️ 建設業 - 現場進捗管理</button>
+            <button class="nav-item" onclick="showDemo('manufacturing')">🏭 製造業 - 生産ライン監視</button>
+            <button class="nav-item" onclick="showDemo('logistics')">🚛 物流業 - 配送追跡管理</button>
+            <button class="nav-item" onclick="showDemo('retail')">🏪 小売業 - 在庫管理</button>
+            <button class="nav-item" onclick="showDemo('healthcare')">🏥 医療業 - 患者情報管理</button>
+            <button class="nav-item" onclick="showDemo('education')">🎓 教育業 - 学習進捗管理</button>
+            <button class="nav-item" onclick="showDemo('agriculture')">🌾 農業 - 作物生育管理</button>
+            <button class="nav-item" onclick="showDemo('realestate')">🏠 不動産業 - 物件管理</button>
+            <button class="nav-item" onclick="showDemo('finance')">💹 金融業 - 取引監視</button>
+            <button class="nav-item" onclick="showDemo('restaurant')">🍽️ 飲食業 - 注文在庫管理</button>
+            <button class="nav-item" onclick="showDemo('bim')">📐 建設業 - BIM設計統合管理</button>
+            <button class="nav-item" onclick="showDemo('supply')">📦 建設業 - 資材調達・SCM管理</button>
+            <button class="nav-item" onclick="showDemo('equipment')">🚜 建設業 - 重機稼働監視</button>
+            <button class="nav-item" onclick="showDemo('quality')">✅ 建設業 - 施工品質検査</button>
+            <button class="nav-item" onclick="showDemo('customer')">🤝 建設業 - 顧客契約管理</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Screen -->
+        <div id="welcome" class="demo-container active">
+            <div class="welcome-screen">
+                <h1 class="welcome-title">🚀 Smart at GATE</h1>
+                <p class="welcome-subtitle">業界特化型カスタムアプリケーション統合デモシステム</p>
+                <p>15の業種別デモをお試しください。上部メニューから選択してください。</p>
+                
+                <div class="welcome-stats">
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value">15</div>
+                        <div class="welcome-stat-label">デモシステム</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value">10</div>
+                        <div class="welcome-stat-label">基本業種</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value">5</div>
+                        <div class="welcome-stat-label">建設業特化</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value">100%</div>
+                        <div class="welcome-stat-label">モバイル対応</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Healthcare Demo -->
+        <div id="healthcare" class="demo-container demo-healthcare">
+            <div class="header">
+                <h1>🏥 スマートホスピタル</h1>
+                <div class="subtitle">統合患者ケア管理システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="healthcare-patients">247</div>
+                    <div class="stat-label">入院患者数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="healthcare-appointments">89</div>
+                    <div class="stat-label">本日の予約</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="healthcare-emergencies">12</div>
+                    <div class="stat-label">緊急患者</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="healthcare-occupancy">96.8%</div>
+                    <div class="stat-label">病床稼働率</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">👥 患者管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">患者一覧</h3>
+                    
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">田中 太郎（65歳）</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    患者ID: P-2024-001 | 入院日: 2024/12/01<br>
+                                    診療科: 循環器内科 | 主治医: 佐藤医師
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">高血圧症・心筋梗塞</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">安定</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    血圧: <span id="patient1-bp">128/82</span><br>
+                                    脈拍: <span id="patient1-pulse">72</span> bpm
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #74b9ff, #0984e3); color: white;" onclick="healthcareViewPatient('P-2024-001')">詳細</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="healthcareUpdateVitals('P-2024-001')">バイタル</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #fdcb6e, #f39c12); color: white;" onclick="healthcareAddNote('P-2024-001')">記録</button>
+                            </div>
+                        </div>
+
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">山田 花子（42歳）</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    患者ID: P-2024-002 | 入院日: 2024/12/02<br>
+                                    診療科: 外科 | 主治医: 鈴木医師
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">急性虫垂炎・術後</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #fff3cd; color: #856404; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">要監視</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    体温: <span id="patient2-temp">37.2</span>°C<br>
+                                    脈拍: <span id="patient2-pulse">88</span> bpm
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #74b9ff, #0984e3); color: white;" onclick="healthcareViewPatient('P-2024-002')">詳細</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="healthcareUpdateVitals('P-2024-002')">バイタル</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #fdcb6e, #f39c12); color: white;" onclick="healthcareAddNote('P-2024-002')">記録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">📅 本日の診療スケジュール</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="font-size: 1.1rem; font-weight: bold; color: #00b894;">09:00</div>
+                                <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">予約済み</span>
+                            </div>
+                            <div style="font-weight: bold; color: #2c3e50;">田中 太郎</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">循環器内科 - 佐藤医師</div>
+                            <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block; margin-top: 5px;">定期検診</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="font-size: 1.1rem; font-weight: bold; color: #00b894;">10:30</div>
+                                <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">進行中</span>
+                            </div>
+                            <div style="font-weight: bold; color: #2c3e50;">山田 花子</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">外科 - 鈴木医師</div>
+                            <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block; margin-top: 5px;">術後診察</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">🚨 緊急アラート・通知</h3>
+                    
+                    <div style="background: #f8d7da; border-left: 5px solid #e74c3c; border-radius: 10px; padding: 15px; margin: 10px 0; display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 1.5rem;">🚨</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">重篤患者アラート</div>
+                            <div>佐々木 一郎様の血圧が危険域に達しています。緊急対応が必要です。</div>
+                            <div style="color: #7f8c8d; font-size: 0.8rem;">2分前</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #d1ecf1; border-left: 5px solid #17a2b8; border-radius: 10px; padding: 15px; margin: 10px 0; display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 1.5rem;">💊</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">投薬時間通知</div>
+                            <div>田中 太郎様の降圧剤投与時間です。</div>
+                            <div style="color: #7f8c8d; font-size: 0.8rem;">5分前</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 医療スタッフ連絡</h3>
+                    <textarea class="message-input" id="healthcare-message" placeholder="患者ケアに関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="healthcareSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="healthcarePatientRounds()">🏥 回診管理</button>
+                    <button class="btn" onclick="healthcareBedManagement()">🛏️ 病床管理</button>
+                    <button class="btn" onclick="healthcareMedicalRecords()">📋 カルテ管理</button>
+                    <button class="btn" onclick="healthcareEmergencyCall()" style="background: linear-gradient(135deg, #e17055, #e74c3c);">🚨 緊急コール</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other demos would be added here in a similar structure -->
+        <!-- For brevity, I'm including just a few more examples -->
+
+        <!-- Construction Demo -->
+        <div id="construction" class="demo-container demo-construction">
+            <div class="header">
+                <h1>🏗️ スマート建設現場</h1>
+                <div class="subtitle">リアルタイム進捗管理ダッシュボード</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-progress">76%</div>
+                    <div class="stat-label">全体進捗</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-tasks">142</div>
+                    <div class="stat-label">実行中タスク</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-workers">89</div>
+                    <div class="stat-label">作業員数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="construction-equipment">24</div>
+                    <div class="stat-label">稼働機械</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📊 工程進捗状況</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>基礎工事</span>
+                            <span style="font-weight: bold; color: #27ae60;">完了</span>
+                        </div>
+                        <div style="background: #ecf0f1; border-radius: 10px; height: 10px;">
+                            <div style="background: linear-gradient(135deg, #27ae60, #2ecc71); height: 100%; width: 100%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>躯体工事</span>
+                            <span style="font-weight: bold; color: #f39c12;">進行中 - 82%</span>
+                        </div>
+                        <div style="background: #ecf0f1; border-radius: 10px; height: 10px;">
+                            <div style="background: linear-gradient(135deg, #f39c12, #e67e22); height: 100%; width: 82%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>仕上げ工事</span>
+                            <span style="font-weight: bold; color: #7f8c8d;">未開始</span>
+                        </div>
+                        <div style="background: #ecf0f1; border-radius: 10px; height: 10px;">
+                            <div style="background: #bdc3c7; height: 100%; width: 15%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 現場連絡</h3>
+                    <textarea class="message-input" id="construction-message" placeholder="現場作業に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="constructionSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="constructionUpdateProgress()">📊 進捗更新</button>
+                    <button class="btn" onclick="constructionViewReports()">📋 報告書表示</button>
+                    <button class="btn" onclick="constructionManageResources()">👷 人員管理</button>
+                    <button class="btn" onclick="constructionEmergencyAlert()" style="background: linear-gradient(135deg, #e17055, #e74c3c);">🚨 緊急警報</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manufacturing Demo -->
+        <div id="manufacturing" class="demo-container demo-manufacturing">
+            <div class="header">
+                <h1>🏭 スマートファクトリー</h1>
+                <div class="subtitle">統合生産ライン監視システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-efficiency">94.2%</div>
+                    <div class="stat-label">生産効率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-output">1,247</div>
+                    <div class="stat-label">本日の生産数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-quality">99.1%</div>
+                    <div class="stat-label">品質合格率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="manufacturing-downtime">2.1%</div>
+                    <div class="stat-label">ダウンタイム</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">⚙️ 生産ライン状況</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: #d4edda; border-radius: 10px; padding: 15px; border-left: 5px solid #27ae60;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4>ライン A</h4>
+                                <span style="background: #27ae60; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">稼働中</span>
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">効率: <span id="line-a-efficiency">96%</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">温度: <span id="line-a-temp">45°C</span></div>
+                        </div>
+                        
+                        <div style="background: #d4edda; border-radius: 10px; padding: 15px; border-left: 5px solid #27ae60;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4>ライン B</h4>
+                                <span style="background: #27ae60; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">稼働中</span>
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">効率: <span id="line-b-efficiency">92%</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">温度: <span id="line-b-temp">42°C</span></div>
+                        </div>
+
+                        <div style="background: #fff3cd; border-radius: 10px; padding: 15px; border-left: 5px solid #f39c12;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4>ライン C</h4>
+                                <span style="background: #f39c12; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">メンテナンス</span>
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">効率: 0%</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">予定復旧: 14:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 製造部連絡</h3>
+                    <textarea class="message-input" id="manufacturing-message" placeholder="生産ラインに関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="manufacturingSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="manufacturingViewReport()">📊 詳細レポート</button>
+                    <button class="btn" onclick="manufacturingStartProduction()">▶️ 生産開始</button>
+                    <button class="btn" onclick="manufacturingPauseProduction()">⏸️ 生産一時停止</button>
+                    <button class="btn" onclick="manufacturingEmergencyStop()" style="background: linear-gradient(135deg, #e17055, #e74c3c);">🛑 緊急停止</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logistics Demo -->
+        <div id="logistics" class="demo-container demo-logistics">
+            <div class="header">
+                <h1>🚛 スマートロジスティクス</h1>
+                <div class="subtitle">リアルタイム配送最適化システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="logistics-active">89</div>
+                    <div class="stat-label">配送中</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="logistics-completed">247</div>
+                    <div class="stat-label">本日完了</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="logistics-vehicles">42</div>
+                    <div class="stat-label">稼働車両</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="logistics-efficiency">94.2%</div>
+                    <div class="stat-label">配送効率</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📦 配送状況追跡</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">配送ID: DEL-2024-001</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    配送先: 東京都渋谷区<br>
+                                    配送員: 田中太郎 | 車両: T-001
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">精密機器</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #fff3cd; color: #856404; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">配送中</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    進捗: 75%<br>
+                                    到着予定: 14:30
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #74b9ff, #0984e3); color: white;" onclick="logisticsTrackDelivery('DEL-2024-001')">追跡</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="logisticsContactDriver('DEL-2024-001')">連絡</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 配送センター連絡</h3>
+                    <textarea class="message-input" id="logistics-message" placeholder="配送に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="logisticsSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="logisticsOptimizeRoutes()">🗺️ ルート最適化</button>
+                    <button class="btn" onclick="logisticsScheduleDelivery()">📅 配送スケジュール</button>
+                    <button class="btn" onclick="logisticsGenerateReport()">📊 配送レポート</button>
+                    <button class="btn" onclick="logisticsEmergencySupport()" style="background: linear-gradient(135deg, #e17055, #e74c3c);">🚨 緊急対応</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retail Demo -->
+        <div id="retail" class="demo-container demo-retail">
+            <div class="header">
+                <h1>🏪 スマートリテール</h1>
+                <div class="subtitle">AI連携在庫最適化システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="retail-products">2,847</div>
+                    <div class="stat-label">総商品数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="retail-value">¥12.4M</div>
+                    <div class="stat-label">在庫価値</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="retail-alerts">23</div>
+                    <div class="stat-label">補充アラート</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="retail-turnover">4.2</div>
+                    <div class="stat-label">在庫回転率</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📦 在庫管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: #f8d7da; border-radius: 10px; padding: 15px; border-left: 5px solid #e74c3c;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">商品A - 在庫不足</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">現在庫: 5個</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">安全在庫: 20個</div>
+                            <button style="padding: 4px 8px; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; background: #e74c3c; color: white; margin-top: 5px;" onclick="retailOrderStock('A')">発注</button>
+                        </div>
+                        
+                        <div style="background: #d4edda; border-radius: 10px; padding: 15px; border-left: 5px solid #27ae60;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">商品B - 適正在庫</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">現在庫: 156個</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">安全在庫: 100個</div>
+                            <button style="padding: 4px 8px; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; background: #27ae60; color: white; margin-top: 5px;" onclick="retailViewProduct('B')">詳細</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 店舗スタッフ連絡</h3>
+                    <textarea class="message-input" id="retail-message" placeholder="在庫管理に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="retailSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="retailGenerateOrder()">🤖 AI自動発注</button>
+                    <button class="btn" onclick="retailPriceOptimization()">💰 価格最適化</button>
+                    <button class="btn" onclick="retailInventoryReport()">📊 在庫レポート</button>
+                    <button class="btn" onclick="retailDemandForecast()">📈 需要予測</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education Demo -->
+        <div id="education" class="demo-container demo-education">
+            <div class="header">
+                <h1>🎓 スマートラーニング</h1>
+                <div class="subtitle">AI個別最適化教育システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="education-students">342</div>
+                    <div class="stat-label">総生徒数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="education-understanding">87.3%</div>
+                    <div class="stat-label">理解度平均</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="education-hours">1,247</div>
+                    <div class="stat-label">総学習時間</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="education-completion">94.2%</div>
+                    <div class="stat-label">課題完了率</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📚 学習進捗管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">田中 太郎（中学3年）</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    学習時間: 42時間 | 完了課題: 28/30<br>
+                                    苦手分野: 数学（関数）
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">理解度: 85%</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 10px;">
+                                    <div style="background: #ecf0f1; border-radius: 10px; height: 8px; width: 100px;">
+                                        <div style="background: linear-gradient(135deg, #fd79a8, #e84393); height: 100%; width: 85%; border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #6c5ce7, #5f3dc4); color: white;" onclick="educationViewProgress('S001')">進捗詳細</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="educationAssignWork('S001')">課題割当</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 教育スタッフ連絡</h3>
+                    <textarea class="message-input" id="education-message" placeholder="学習指導に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="educationSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="educationCreateAssignment()">📝 AI課題作成</button>
+                    <button class="btn" onclick="educationAnalyzePerformance()">📊 学習分析</button>
+                    <button class="btn" onclick="educationPersonalizedPath()">🎯 個別指導計画</button>
+                    <button class="btn" onclick="educationParentReport()">👨‍👩‍👧‍👦 保護者連絡</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agriculture Demo -->
+        <div id="agriculture" class="demo-container demo-agriculture">
+            <div class="header">
+                <h1>🌾 スマートアグリ</h1>
+                <div class="subtitle">IoT連携精密農業管理システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="agriculture-area">247</div>
+                    <div class="stat-label">栽培面積(ha)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="agriculture-crops">12</div>
+                    <div class="stat-label">作物種類</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="agriculture-sensors">156</div>
+                    <div class="stat-label">IoTセンサー</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="agriculture-yield">+15%</div>
+                    <div class="stat-label">収量予測</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🚜 圃場管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: #d4edda; border-radius: 10px; padding: 15px; border-left: 5px solid #27ae60;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">第1圃場 - トマト</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">土壌湿度: <span id="field1-moisture">65%</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">温度: <span id="field1-temp">24°C</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">pH: 6.2</div>
+                            <button style="padding: 4px 8px; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; background: #27ae60; color: white; margin-top: 5px;" onclick="agricultureViewField('F001')">詳細</button>
+                        </div>
+                        
+                        <div style="background: #fff3cd; border-radius: 10px; padding: 15px; border-left: 5px solid #f39c12;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">第2圃場 - キュウリ</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">土壌湿度: <span id="field2-moisture">42%</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">温度: <span id="field2-temp">26°C</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">pH: 6.8</div>
+                            <button style="padding: 4px 8px; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; background: #f39c12; color: white; margin-top: 5px;" onclick="agricultureWaterControl('F002')">灌水</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 農場スタッフ連絡</h3>
+                    <textarea class="message-input" id="agriculture-message" placeholder="農作業に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="agricultureSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="agricultureAutoIrrigation()">💧 自動灌水</button>
+                    <button class="btn" onclick="agricultureDroneMonitoring()">🚁 ドローン監視</button>
+                    <button class="btn" onclick="agricultureWeatherForecast()">🌤️ 気象予報</button>
+                    <button class="btn" onclick="agricultureHarvestPlan()">📅 収穫計画</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real Estate Demo -->
+        <div id="realestate" class="demo-container demo-realestate">
+            <div class="header">
+                <h1>🏠 スマートプロパティ</h1>
+                <div class="subtitle">統合不動産管理プラットフォーム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="realestate-properties">147</div>
+                    <div class="stat-label">管理物件数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="realestate-occupancy">94.3%</div>
+                    <div class="stat-label">入居率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="realestate-revenue">¥24.7M</div>
+                    <div class="stat-label">月間収益</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="realestate-maintenance">12</div>
+                    <div class="stat-label">メンテナンス予定</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🏢 物件管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">パークシティ渋谷 - 201号室</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    家賃: ¥120,000/月 | 面積: 45㎡<br>
+                                    入居者: 田中様 | 契約期間: 2年
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">入居中</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">優良</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    支払状況: 正常<br>
+                                    最終点検: 2024/11/15
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #a29bfe, #8b7cf6); color: white;" onclick="realestateViewProperty('P201')">詳細</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="realestateContactTenant('P201')">連絡</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 関係者連絡</h3>
+                    <textarea class="message-input" id="realestate-message" placeholder="物件管理に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="realestateSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="realestateScheduleInspection()">🔍 点検スケジュール</button>
+                    <button class="btn" onclick="realestateUpdateMaintenance()">🔧 メンテナンス更新</button>
+                    <button class="btn" onclick="realestateGenerateReport()">📊 収支レポート</button>
+                    <button class="btn" onclick="realestateMarketAnalysis()">📈 市場分析</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finance Demo -->
+        <div id="finance" class="demo-container demo-finance">
+            <div class="header">
+                <h1>💹 スマートトレーディング</h1>
+                <div class="subtitle">AI取引監視・リスク管理システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="finance-assets">¥1.2B</div>
+                    <div class="stat-label">総資産</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="finance-pnl">+¥2.4M</div>
+                    <div class="stat-label">本日損益</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="finance-trades">247</div>
+                    <div class="stat-label">取引回数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="finance-risk">3.2%</div>
+                    <div class="stat-label">リスクレベル</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📊 ポートフォリオ監視</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: #d4edda; border-radius: 10px; padding: 15px; border-left: 5px solid #27ae60;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">日本株式</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">投資額: ¥450M</div>
+                            <div style="color: #27ae60; font-size: 0.9rem; font-weight: bold;">+2.3% (¥10.4M)</div>
+                            <div style="font-size: 0.8rem; color: #7f8c8d;">リスク: 低</div>
+                        </div>
+                        
+                        <div style="background: #f8d7da; border-radius: 10px; padding: 15px; border-left: 5px solid #e74c3c;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">暗号通貨</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">投資額: ¥120M</div>
+                            <div style="color: #e74c3c; font-size: 0.9rem; font-weight: bold;">-5.7% (-¥6.8M)</div>
+                            <div style="font-size: 0.8rem; color: #7f8c8d;">リスク: 高</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 投資チーム連絡</h3>
+                    <textarea class="message-input" id="finance-message" placeholder="投資戦略に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="financeSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="financeExecuteStrategy()">🎯 戦略実行</button>
+                    <button class="btn" onclick="financeRebalancePortfolio()">⚖️ リバランス</button>
+                    <button class="btn" onclick="financeRiskAssessment()">🛡️ リスク評価</button>
+                    <button class="btn" onclick="financeEmergencyStop()" style="background: linear-gradient(135deg, #e17055, #e74c3c);">🛑 緊急停止</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurant Demo -->
+        <div id="restaurant" class="demo-container demo-restaurant">
+            <div class="header">
+                <h1>🍽️ スマートレストラン</h1>
+                <div class="subtitle">AI連携店舗運営最適化システム</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="restaurant-orders">89</div>
+                    <div class="stat-label">処理中注文</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="restaurant-sales">¥247K</div>
+                    <div class="stat-label">本日売上</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="restaurant-cooking">12分</div>
+                    <div class="stat-label">平均調理時間</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="restaurant-satisfaction">4.7</div>
+                    <div class="stat-label">顧客満足度</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🍳 注文・キッチン管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #fff3cd; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">注文 #247 - テーブル 5</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    ハンバーガーセット x2, サラダ x1<br>
+                                    注文時刻: 12:45 | 調理担当: 田中シェフ
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">合計: ¥2,400</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #fff3cd; color: #856404; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">調理中</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    経過時間: 8分<br>
+                                    完成予定: 13:00
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="restaurantUpdateOrderStatus('247')">状況更新</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 スタッフ連絡</h3>
+                    <textarea class="message-input" id="restaurant-message" placeholder="店舗運営に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="restaurantSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="restaurantManageInventory()">📦 在庫管理</button>
+                    <button class="btn" onclick="restaurantAutoOrder()">🤖 自動発注</button>
+                    <button class="btn" onclick="restaurantMenuOptimization()">📊 メニュー最適化</button>
+                    <button class="btn" onclick="restaurantCustomerFeedback()">⭐ 顧客評価</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Construction Specialized Demos -->
+        
+        <!-- BIM Demo -->
+        <div id="bim" class="demo-container demo-bim">
+            <div class="header">
+                <h1>📐 スマート設計・BIM統合管理システム</h1>
+                <div class="subtitle">3D BIMモデル管理・設計変更履歴・協業ツール</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="bim-progress">82%</div>
+                    <div class="stat-label">設計進捗</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="bim-conflicts">7</div>
+                    <div class="stat-label">干渉箇所</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="bim-revisions">24</div>
+                    <div class="stat-label">設計変更</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="bim-cost">¥247M</div>
+                    <div class="stat-label">概算コスト</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🏗️ BIMモデル管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #8e44ad, #3498db); color: white;">
+                    <h3>🏢 3D BIMモデルビューア</h3>
+                    <p>建物の3Dモデルと設計情報をリアルタイム表示</p>
+                    <button style="padding: 10px 20px; border: none; border-radius: 8px; background: white; color: #8e44ad; cursor: pointer; margin-top: 15px;" onclick="bimShowBIMViewer()">3Dモデル表示</button>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 設計チーム連絡</h3>
+                    <textarea class="message-input" id="bim-message" placeholder="設計・BIM管理に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="bimSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="bimResolveInterference()">🔧 干渉解決</button>
+                    <button class="btn" onclick="bimSendDesignUpdate()">📤 設計更新配信</button>
+                    <button class="btn" onclick="bimGenerateReport()">📊 設計レポート</button>
+                    <button class="btn" onclick="bimScheduleReview()">📅 レビュー予定</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supply Chain Demo -->
+        <div id="supply" class="demo-container demo-supply">
+            <div class="header">
+                <h1>📦 スマート資材調達・サプライチェーン管理システム</h1>
+                <div class="subtitle">自動発注・配送リアルタイム追跡・品質検査記録・在庫最適化</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="supply-materials">247</div>
+                    <div class="stat-label">資材種類</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="supply-fulfillment">94.3%</div>
+                    <div class="stat-label">納期達成率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="supply-cost">¥12.4M</div>
+                    <div class="stat-label">月間調達費</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="supply-suppliers">47</div>
+                    <div class="stat-label">取引業者数</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📋 調達管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #f8d7da; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">コンクリート - 在庫不足</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    現在庫: 50m³ | 必要量: 200m³<br>
+                                    推奨業者: ABC建材 | 単価: ¥8,500/m³
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">緊急発注推奨</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">不足</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    AI予測需要: 180m³<br>
+                                    配送日: 明日可能
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #e67e22, #d35400); color: white;" onclick="supplyOrderFromSupplier('concrete')">発注</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="supplyAcceptPrediction('concrete')">AI予測採用</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 調達部門連絡</h3>
+                    <textarea class="message-input" id="supply-message" placeholder="資材調達に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="supplySendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="supplyEmergencyOrder()">🚨 緊急発注</button>
+                    <button class="btn" onclick="supplyOptimizeSupply()">📊 調達最適化</button>
+                    <button class="btn" onclick="supplySupplierEvaluation()">⭐ 業者評価</button>
+                    <button class="btn" onclick="supplyCostAnalysis()">💰 コスト分析</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment Monitoring Demo -->
+        <div id="equipment" class="demo-container demo-equipment">
+            <div class="header">
+                <h1>🚜 スマート重機・建設機械稼働監視システム</h1>
+                <div class="subtitle">稼働時間監視・燃費効率分析・予防保全・故障予測</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="equipment-active">24</div>
+                    <div class="stat-label">稼働機械</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="equipment-utilization">87.5%</div>
+                    <div class="stat-label">稼働率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="equipment-fuel">12.4L/h</div>
+                    <div class="stat-label">平均燃費</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="equipment-maintenance">3</div>
+                    <div class="stat-label">保全予定</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🔧 機械監視</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: #d4edda; border-radius: 10px; padding: 15px; border-left: 5px solid #27ae60;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">ショベルカー #001</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">稼働時間: <span id="excavator1-hours">247h</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">燃費: <span id="excavator1-fuel">11.2L/h</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">位置: 第3工区</div>
+                            <span style="background: #27ae60; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">正常稼働</span>
+                        </div>
+                        
+                        <div style="background: #fff3cd; border-radius: 10px; padding: 15px; border-left: 5px solid #f39c12;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">ダンプトラック #005</div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">稼働時間: <span id="truck1-hours">1,547h</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">燃費: <span id="truck1-fuel">15.8L/h</span></div>
+                            <div style="color: #7f8c8d; font-size: 0.9rem;">位置: 資材置場</div>
+                            <span style="background: #f39c12; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">保全推奨</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 機械管理部門連絡</h3>
+                    <textarea class="message-input" id="equipment-message" placeholder="機械管理に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="equipmentSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="equipmentShowDetail()">📊 詳細監視</button>
+                    <button class="btn" onclick="equipmentScheduleMaintenance()">🔧 保全スケジュール</button>
+                    <button class="btn" onclick="equipmentOptimizeOperation()">⚙️ 運用最適化</button>
+                    <button class="btn" onclick="equipmentGPSTracking()">📍 GPS追跡</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quality Inspection Demo -->
+        <div id="quality" class="demo-container demo-quality">
+            <div class="header">
+                <h1>✅ スマート施工品質・検査管理システム</h1>
+                <div class="subtitle">デジタル検査チェックリスト・不適合管理・是正措置追跡・品質データ分析</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="quality-completion">89%</div>
+                    <div class="stat-label">検査完了率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="quality-issues">7</div>
+                    <div class="stat-label">不適合件数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="quality-score">94.3</div>
+                    <div class="stat-label">品質スコア</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="quality-inspectors">12</div>
+                    <div class="stat-label">検査員数</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">📋 品質検査</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">🔍 検査チェックリスト</h3>
+                    <div style="display: grid; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                            <input type="checkbox" id="check1" checked onclick="qualityToggleCheck('check1')">
+                            <label for="check1" style="flex: 1;">基礎配筋検査 - 鉄筋径・間隔確認</label>
+                            <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">完了</span>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                            <input type="checkbox" id="check2" onclick="qualityToggleCheck('check2')">
+                            <label for="check2" style="flex: 1;">コンクリート打設検査 - 強度・仕上がり確認</label>
+                            <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">進行中</span>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                            <input type="checkbox" id="check3" onclick="qualityToggleCheck('check3')">
+                            <label for="check3" style="flex: 1;">外壁防水検査 - 雨水浸入試験</label>
+                            <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">未実施</span>
+                        </div>
+                    </div>
+                    
+                    <button style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; cursor: pointer; margin-top: 15px;" onclick="qualityUploadPhoto()">📷 検査写真アップロード</button>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 品質管理部門連絡</h3>
+                    <textarea class="message-input" id="quality-message" placeholder="品質管理に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="qualitySendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="qualitySubmitInspection()">✅ 検査完了報告</button>
+                    <button class="btn" onclick="qualityScheduleCorrection()">🔧 是正措置予定</button>
+                    <button class="btn" onclick="qualityQualityTrends()">📈 品質トレンド</button>
+                    <button class="btn" onclick="qualityInspectorPerformance()">👷 検査員評価</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Management Demo -->
+        <div id="customer" class="demo-container demo-customer">
+            <div class="header">
+                <h1>🤝 スマート顧客・契約管理システム</h1>
+                <div class="subtitle">顧客情報管理・契約進捗追跡・売上分析・顧客満足度管理</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="customer-pipeline">¥247M</div>
+                    <div class="stat-label">パイプライン金額</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="customer-winrate">67.3%</div>
+                    <div class="stat-label">受注率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="customer-satisfaction">4.6</div>
+                    <div class="stat-label">顧客満足度</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="customer-newdeals">12</div>
+                    <div class="stat-label">新規案件</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">💼 営業管理</h2>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">田中建設様 - オフィスビル建設</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
+                                    契約金額: ¥450M | 進捗: 契約交渉<br>
+                                    営業担当: 佐藤 | 次回打合せ: 12/15
+                                </div>
+                                <div style="background: #e8f5e8; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; display: inline-block;">受注確度: 85%</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span style="background: #fff3cd; color: #856404; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">交渉中</span>
+                                <div style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
+                                    満足度: 4.8/5<br>
+                                    取引歴: 3年
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #8e44ad, #7d3c98); color: white;" onclick="customerShowDetail('C001')">詳細</button>
+                                <button style="padding: 8px 12px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: linear-gradient(135deg, #00b894, #00cec9); color: white;" onclick="customerStartMeeting('C001')">会議開始</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-box">
+                    <h3>📱 営業チーム連絡</h3>
+                    <textarea class="message-input" id="customer-message" placeholder="営業活動に関する連絡事項を入力してください..."></textarea>
+                    <button class="btn" onclick="customerSendMessage()">メッセージ送信</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="customerAddNewProspect()">👤 新規見込客追加</button>
+                    <button class="btn" onclick="customerScheduleMeeting()">📅 打合せ予定</button>
+                    <button class="btn" onclick="customerSendProposal()">📄 提案書送付</button>
+                    <button class="btn" onclick="customerSatisfactionSurvey()">⭐ 満足度調査</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentDemo = 'welcome';
+        let healthcareIntervals = [];
+        let manufacturingIntervals = [];
+
+        function toggleMenu() {
+            const menu = document.getElementById('navMenu');
+            menu.classList.toggle('active');
+        }
+
+        function showDemo(demoId) {
+            // Hide all demos
+            const demos = document.querySelectorAll('.demo-container');
+            demos.forEach(demo => {
+                demo.classList.remove('active');
+            });
+
+            // Update nav items
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show selected demo
+            const targetDemo = document.getElementById(demoId);
+            if (targetDemo) {
+                targetDemo.classList.add('active');
+                
+                // Find and activate corresponding nav item
+                const navItem = Array.from(navItems).find(item => 
+                    item.textContent.includes(getNavTextForDemo(demoId))
+                );
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            }
+
+            // Stop previous intervals
+            clearAllIntervals();
+
+            // Start demo-specific functions
+            currentDemo = demoId;
+            if (demoId === 'healthcare') {
+                startHealthcareUpdates();
+            } else if (demoId === 'manufacturing') {
+                startManufacturingUpdates();
+            }
+
+            // Close mobile menu
+            document.getElementById('navMenu').classList.remove('active');
+        }
+
+        function getNavTextForDemo(demoId) {
+            const mapping = {
+                'welcome': 'ホーム',
+                'construction': '建設業 - 現場進捗管理',
+                'manufacturing': '製造業 - 生産ライン監視',
+                'logistics': '物流業 - 配送追跡管理',
+                'retail': '小売業 - 在庫管理',
+                'healthcare': '医療業 - 患者情報管理',
+                'education': '教育業 - 学習進捗管理',
+                'agriculture': '農業 - 作物生育管理',
+                'realestate': '不動産業 - 物件管理',
+                'finance': '金融業 - 取引監視',
+                'restaurant': '飲食業 - 注文在庫管理',
+                'bim': '建設業 - BIM設計統合管理',
+                'supply': '建設業 - 資材調達・SCM管理',
+                'equipment': '建設業 - 重機稼働監視',
+                'quality': '建設業 - 施工品質検査',
+                'customer': '建設業 - 顧客契約管理'
+            };
+            return mapping[demoId] || '';
+        }
+
+        function clearAllIntervals() {
+            healthcareIntervals.forEach(interval => clearInterval(interval));
+            manufacturingIntervals.forEach(interval => clearInterval(interval));
+            healthcareIntervals = [];
+            manufacturingIntervals = [];
+        }
+
+        // Healthcare Functions
+        function startHealthcareUpdates() {
+            // Update patient stats every minute
+            const statsInterval = setInterval(() => {
+                const emergencyCount = Math.floor(Math.random() * 5) + 10;
+                document.getElementById('healthcare-emergencies').textContent = emergencyCount;
+            }, 60000);
+            healthcareIntervals.push(statsInterval);
+
+            // Update vital signs every 5 minutes
+            const vitalsInterval = setInterval(() => {
+                const systolic1 = Math.floor(Math.random() * 20) + 120;
+                const diastolic1 = Math.floor(Math.random() * 15) + 75;
+                const pulse1 = Math.floor(Math.random() * 20) + 65;
+                document.getElementById('patient1-bp').textContent = `${systolic1}/${diastolic1}`;
+                document.getElementById('patient1-pulse').textContent = pulse1;
+
+                const temp2 = (Math.random() * 1 + 36.5).toFixed(1);
+                const pulse2 = Math.floor(Math.random() * 20) + 80;
+                document.getElementById('patient2-temp').textContent = temp2;
+                document.getElementById('patient2-pulse').textContent = pulse2;
+            }, 300000);
+            healthcareIntervals.push(vitalsInterval);
+        }
+
+        function healthcareSendMessage() {
+            const messageInput = document.getElementById('healthcare-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('メッセージを医療スタッフに送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function healthcareViewPatient(patientId) {
+            alert(`患者 ${patientId} の詳細カルテを表示します。`);
+        }
+
+        function healthcareUpdateVitals(patientId) {
+            alert(`患者 ${patientId} のバイタルサインを更新します。`);
+        }
+
+        function healthcareAddNote(patientId) {
+            const note = prompt(`患者 ${patientId} の医療記録を入力してください:`);
+            if (note) {
+                alert(`患者 ${patientId} に医療記録を追加しました: ${note}`);
+            }
+        }
+
+        function healthcarePatientRounds() {
+            alert('回診スケジュールを管理します。医師の回診ルートを最適化します。');
+        }
+
+        function healthcareBedManagement() {
+            alert('病床管理画面を開きます。空床状況と入退院予定を確認できます。');
+        }
+
+        function healthcareMedicalRecords() {
+            alert('電子カルテシステムにアクセスします。');
+        }
+
+        function healthcareEmergencyCall() {
+            if (confirm('緊急事態ですか？医療スタッフに緊急コールを送信しますか？')) {
+                alert('緊急コールを全医療スタッフに送信しました。対応チームが向かいます。');
+            }
+        }
+
+        // Construction Functions
+        function constructionSendMessage() {
+            const messageInput = document.getElementById('construction-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('現場スタッフにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function constructionUpdateProgress() {
+            alert('工程進捗を更新しています。最新の作業状況を反映します。');
+        }
+
+        function constructionViewReports() {
+            alert('施工管理レポートを表示します。進捗・品質・安全性の詳細データを確認できます。');
+        }
+
+        function constructionManageResources() {
+            alert('人員管理画面を開きます。作業員の配置と稼働状況を最適化します。');
+        }
+
+        function constructionEmergencyAlert() {
+            if (confirm('緊急事態ですか？現場スタッフに緊急警報を送信しますか？')) {
+                alert('緊急警報を全現場スタッフに送信しました。安全確保を最優先に対応してください。');
+            }
+        }
+
+        // Manufacturing Functions
+        function startManufacturingUpdates() {
+            const updateInterval = setInterval(() => {
+                // Update line efficiency
+                document.getElementById('line-a-efficiency').textContent = Math.floor(Math.random() * 10 + 90) + '%';
+                document.getElementById('line-b-efficiency').textContent = Math.floor(Math.random() * 10 + 85) + '%';
+                
+                // Update temperatures
+                document.getElementById('line-a-temp').textContent = Math.floor(Math.random() * 10 + 40) + '°C';
+                document.getElementById('line-b-temp').textContent = Math.floor(Math.random() * 8 + 38) + '°C';
+                
+                // Update overall stats
+                document.getElementById('manufacturing-efficiency').textContent = (Math.random() * 5 + 92).toFixed(1) + '%';
+                document.getElementById('manufacturing-output').textContent = Math.floor(Math.random() * 100 + 1200);
+            }, 5000);
+            manufacturingIntervals.push(updateInterval);
+        }
+
+        function manufacturingSendMessage() {
+            const messageInput = document.getElementById('manufacturing-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('製造部スタッフにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function manufacturingViewReport() {
+            alert('生産効率の詳細レポートを表示します。品質、稼働率、保守状況の分析データを確認できます。');
+        }
+
+        function manufacturingStartProduction() {
+            alert('生産ラインを開始します。全設備の稼働確認を行い、品質管理システムを起動します。');
+        }
+
+        function manufacturingPauseProduction() {
+            alert('生産ラインを一時停止します。現在の作業を安全に中断し、再開準備を整えます。');
+        }
+
+        function manufacturingEmergencyStop() {
+            if (confirm('緊急停止を実行しますか？全生産ラインが即座に停止されます。')) {
+                alert('緊急停止を実行しました。全生産ラインが停止し、安全確認を開始します。');
+            }
+        }
+
+        // Logistics Functions
+        function logisticsSendMessage() {
+            const messageInput = document.getElementById('logistics-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('配送センターにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function logisticsTrackDelivery(deliveryId) {
+            alert(`配送ID ${deliveryId} の詳細追跡情報を表示します。リアルタイム位置情報とルート進捗を確認できます。`);
+        }
+
+        function logisticsContactDriver(deliveryId) {
+            alert(`配送ID ${deliveryId} の配送員に連絡します。配送状況の確認や特別な指示を伝達できます。`);
+        }
+
+        function logisticsOptimizeRoutes() {
+            alert('AI配送ルート最適化を実行します。交通状況と配送優先度を考慮して最適ルートを算出します。');
+        }
+
+        function logisticsScheduleDelivery() {
+            alert('配送スケジュール管理画面を開きます。新規配送予約と既存スケジュールの調整ができます。');
+        }
+
+        function logisticsGenerateReport() {
+            alert('配送効率レポートを生成します。配送時間、燃費効率、顧客満足度の詳細分析データを確認できます。');
+        }
+
+        function logisticsEmergencySupport() {
+            if (confirm('緊急配送対応を要請しますか？優先配送チームが緊急対応します。')) {
+                alert('緊急配送対応チームに要請を送信しました。最優先で対応いたします。');
+            }
+        }
+
+        // Retail Functions
+        function retailSendMessage() {
+            const messageInput = document.getElementById('retail-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('店舗スタッフにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function retailOrderStock(productId) {
+            alert(`商品${productId}の在庫補充注文を実行します。推奨発注量で自動発注を行います。`);
+        }
+
+        function retailViewProduct(productId) {
+            alert(`商品${productId}の詳細情報を表示します。売上動向、在庫推移、価格変動履歴を確認できます。`);
+        }
+
+        function retailGenerateOrder() {
+            alert('AI自動発注システムを実行します。過去の売上データと需要予測に基づいて最適な発注を行います。');
+        }
+
+        function retailPriceOptimization() {
+            alert('AI価格最適化を実行します。競合価格と需要動向を分析して最適価格を提案します。');
+        }
+
+        function retailInventoryReport() {
+            alert('在庫レポートを生成します。商品別在庫状況、回転率、利益率の詳細分析を確認できます。');
+        }
+
+        function retailDemandForecast() {
+            alert('AI需要予測分析を実行します。季節性、トレンド、イベント影響を考慮した需要予測を表示します。');
+        }
+
+        // Education Functions
+        function educationSendMessage() {
+            const messageInput = document.getElementById('education-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('教育スタッフにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function educationViewProgress(studentId) {
+            alert(`生徒${studentId}の学習進捗詳細を表示します。科目別理解度、学習時間、課題完了状況を確認できます。`);
+        }
+
+        function educationAssignWork(studentId) {
+            alert(`生徒${studentId}に個別課題を割り当てます。理解度に応じた適切な難易度の課題を選択します。`);
+        }
+
+        function educationCreateAssignment() {
+            alert('AI課題作成システムを起動します。学習進捗と理解度に基づいて個別最適化された課題を自動生成します。');
+        }
+
+        function educationAnalyzePerformance() {
+            alert('学習パフォーマンス分析を実行します。クラス全体と個別生徒の学習効果を詳細分析します。');
+        }
+
+        function educationPersonalizedPath() {
+            alert('個別学習パス設計を開始します。AIが各生徒の特性に合わせた最適な学習計画を作成します。');
+        }
+
+        function educationParentReport() {
+            alert('保護者向けレポートを生成します。学習進捗、理解度、今後の学習計画を保護者に共有します。');
+        }
+
+        // Agriculture Functions
+        function agricultureSendMessage() {
+            const messageInput = document.getElementById('agriculture-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('農場スタッフにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function agricultureViewField(fieldId) {
+            alert(`圃場${fieldId}の詳細情報を表示します。土壌データ、作物生育状況、環境センサー情報を確認できます。`);
+        }
+
+        function agricultureWaterControl(fieldId) {
+            alert(`圃場${fieldId}の灌水システムを制御します。土壌湿度に基づいて適切な水量で灌水を実行します。`);
+        }
+
+        function agricultureAutoIrrigation() {
+            alert('自動灌水システムを起動します。各圃場の土壌湿度と作物の需要に基づいて最適な灌水を実行します。');
+        }
+
+        function agricultureDroneMonitoring() {
+            alert('ドローン監視システムを起動します。圃場の空撮画像から作物の生育状況と病害虫の早期発見を行います。');
+        }
+
+        function agricultureWeatherForecast() {
+            alert('精密気象予報システムを表示します。局地的な気象データに基づいた農作業最適化提案を確認できます。');
+        }
+
+        function agricultureHarvestPlan() {
+            alert('収穫計画システムを起動します。作物の成熟度と市場価格動向を考慮した最適収穫スケジュールを作成します。');
+        }
+
+        // Real Estate Functions
+        function realestateSendMessage() {
+            const messageInput = document.getElementById('realestate-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('関係者にメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function realestateViewProperty(propertyId) {
+            alert(`物件${propertyId}の詳細情報を表示します。入居者情報、収支状況、メンテナンス履歴を確認できます。`);
+        }
+
+        function realestateContactTenant(propertyId) {
+            alert(`物件${propertyId}の入居者に連絡します。契約更新、メンテナンス予定、重要なお知らせを伝達できます。`);
+        }
+
+        function realestateScheduleInspection() {
+            alert('物件点検スケジュール管理を開きます。定期点検と臨時点検の予定調整、点検員の配置を行います。');
+        }
+
+        function realestateUpdateMaintenance() {
+            alert('メンテナンス情報を更新します。修繕履歴、部品交換記録、次回点検予定を最新状態に更新します。');
+        }
+
+        function realestateGenerateReport() {
+            alert('収支レポートを生成します。物件別収益性、空室率動向、維持費分析の詳細データを確認できます。');
+        }
+
+        function realestateMarketAnalysis() {
+            alert('不動産市場分析を実行します。地域相場動向、競合物件情報、投資収益性を総合的に分析します。');
+        }
+
+        // Finance Functions
+        function financeSendMessage() {
+            const messageInput = document.getElementById('finance-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('投資チームにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function financeExecuteStrategy() {
+            alert('投資戦略を実行します。AIアルゴリズムに基づいた最適なポートフォリオ調整を行います。');
+        }
+
+        function financeRebalancePortfolio() {
+            alert('ポートフォリオリバランシングを実行します。リスク分散と収益最大化を目指した資産配分調整を行います。');
+        }
+
+        function financeRiskAssessment() {
+            alert('リスク評価分析を実行します。市場ボラティリティ、信用リスク、流動性リスクを総合的に評価します。');
+        }
+
+        function financeEmergencyStop() {
+            if (confirm('取引緊急停止を実行しますか？全自動取引が即座に停止されます。')) {
+                alert('取引緊急停止を実行しました。全ポジションの安全確保を最優先に対応します。');
+            }
+        }
+
+        // Restaurant Functions
+        function restaurantSendMessage() {
+            const messageInput = document.getElementById('restaurant-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('スタッフにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function restaurantUpdateOrderStatus(orderId) {
+            alert(`注文${orderId}の状況を更新します。調理進捗、完成予定時刻、特別指示を最新状態に更新します。`);
+        }
+
+        function restaurantManageInventory() {
+            alert('在庫管理システムを開きます。食材の消費期限、在庫量、発注タイミングを効率的に管理します。');
+        }
+
+        function restaurantAutoOrder() {
+            alert('AI自動発注システムを起動します。過去の消費データと予約状況に基づいて最適な食材発注を行います。');
+        }
+
+        function restaurantMenuOptimization() {
+            alert('メニュー最適化分析を実行します。売上データ、原価率、顧客満足度を分析してメニュー改善を提案します。');
+        }
+
+        function restaurantCustomerFeedback() {
+            alert('顧客評価システムを表示します。料理の評価、サービス満足度、改善要望を総合的に分析します。');
+        }
+
+        // BIM Functions
+        function bimSendMessage() {
+            const messageInput = document.getElementById('bim-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('設計チームにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function bimShowBIMViewer() {
+            alert('3D BIMモデルビューアを起動します。建物の詳細な3Dモデルと設計情報をリアルタイムで確認できます。');
+        }
+
+        function bimResolveInterference() {
+            alert('干渉解決システムを起動します。構造体、設備配管、電気配線の干渉箇所を特定し解決策を提案します。');
+        }
+
+        function bimSendDesignUpdate() {
+            alert('設計変更情報を関係者に配信します。最新の図面と変更内容を全チームメンバーに即座に共有します。');
+        }
+
+        function bimGenerateReport() {
+            alert('設計進捗レポートを生成します。モデル完成度、変更履歴、コスト影響分析の詳細データを確認できます。');
+        }
+
+        function bimScheduleReview() {
+            alert('設計レビュー会議をスケジュールします。関係者の都合を調整し、効率的なレビュー計画を立案します。');
+        }
+
+        // Supply Chain Functions
+        function supplySendMessage() {
+            const messageInput = document.getElementById('supply-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('調達部門にメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function supplyOrderFromSupplier(materialId) {
+            alert(`資材${materialId}の発注を実行します。推奨業者への緊急発注手続きを開始し、配送スケジュールを確定します。`);
+        }
+
+        function supplyAcceptPrediction(materialId) {
+            alert(`資材${materialId}のAI需要予測を採用します。予測データに基づいた最適発注量で自動発注を実行します。`);
+        }
+
+        function supplyEmergencyOrder() {
+            alert('緊急発注システムを起動します。工程遅延を防ぐため、最優先で資材調達手続きを実行します。');
+        }
+
+        function supplyOptimizeSupply() {
+            alert('調達最適化分析を実行します。コスト削減、納期短縮、品質向上を総合的に考慮した調達戦略を提案します。');
+        }
+
+        function supplySupplierEvaluation() {
+            alert('業者評価システムを表示します。納期遵守率、品質評価、価格競争力を総合的に分析し業者ランキングを確認できます。');
+        }
+
+        function supplyCostAnalysis() {
+            alert('コスト分析レポートを生成します。資材価格動向、調達費用最適化、予算管理の詳細データを確認できます。');
+        }
+
+        // Equipment Functions
+        function equipmentSendMessage() {
+            const messageInput = document.getElementById('equipment-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('機械管理部門にメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function equipmentShowDetail() {
+            alert('機械詳細監視画面を表示します。各機械のリアルタイム稼働状況、燃費効率、故障予測を確認できます。');
+        }
+
+        function equipmentScheduleMaintenance() {
+            alert('保全スケジュール管理を開きます。予防保全計画、部品交換予定、メンテナンス要員の配置を最適化します。');
+        }
+
+        function equipmentOptimizeOperation() {
+            alert('運用最適化システムを起動します。機械配置、作業効率、燃費改善を総合的に分析し最適運用を提案します。');
+        }
+
+        function equipmentGPSTracking() {
+            alert('GPS追跡システムを表示します。全機械のリアルタイム位置情報、移動履歴、作業エリア分析を確認できます。');
+        }
+
+        // Quality Functions
+        function qualitySendMessage() {
+            const messageInput = document.getElementById('quality-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('品質管理部門にメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function qualityToggleCheck(checkId) {
+            const checkbox = document.getElementById(checkId);
+            const status = checkbox.checked ? '完了' : '未実施';
+            alert(`検査項目の状況を「${status}」に更新しました。`);
+        }
+
+        function qualityUploadPhoto() {
+            alert('検査写真アップロード機能を起動します。撮影した検査写真を分類・整理し、検査記録に自動添付します。');
+        }
+
+        function qualitySubmitInspection() {
+            alert('検査完了報告を提出します。全検査項目の結果を総合評価し、品質基準適合性を最終確認します。');
+        }
+
+        function qualityScheduleCorrection() {
+            alert('是正措置スケジュールを作成します。不適合項目の修正計画、責任者配置、完了予定を設定します。');
+        }
+
+        function qualityQualityTrends() {
+            alert('品質トレンド分析を表示します。時系列での品質変化、不適合傾向、改善効果を詳細分析します。');
+        }
+
+        function qualityInspectorPerformance() {
+            alert('検査員パフォーマンス評価を表示します。検査精度、効率性、専門性を総合的に評価し育成計画を立案します。');
+        }
+
+        // Customer Functions
+        function customerSendMessage() {
+            const messageInput = document.getElementById('customer-message');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                alert('営業チームにメッセージを送信しました: ' + message);
+                messageInput.value = '';
+            } else {
+                alert('メッセージを入力してください。');
+            }
+        }
+
+        function customerShowDetail(customerId) {
+            alert(`顧客${customerId}の詳細情報を表示します。取引履歴、契約内容、満足度推移、今後の営業戦略を確認できます。`);
+        }
+
+        function customerStartMeeting(customerId) {
+            alert(`顧客${customerId}との会議を開始します。Web会議システムを起動し、関連資料を自動準備します。`);
+        }
+
+        function customerAddNewProspect() {
+            alert('新規見込客登録システムを起動します。顧客情報、ニーズ分析、アプローチ計画を総合的に管理します。');
+        }
+
+        function customerScheduleMeeting() {
+            alert('打合せスケジュール管理を開きます。顧客・営業担当の都合を調整し、効果的な商談計画を立案します。');
+        }
+
+        function customerSendProposal() {
+            alert('提案書自動生成システムを起動します。顧客ニーズに最適化された提案内容を作成し、送付手続きを行います。');
+        }
+
+        function customerSatisfactionSurvey() {
+            alert('顧客満足度調査システムを表示します。サービス品質、対応満足度、改善要望を総合的に分析します。');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showDemo('welcome');
+        });
+    </script>
+</body>
+</html>
