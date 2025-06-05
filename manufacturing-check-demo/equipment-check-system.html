@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>製造業機器チェックシステム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #34495e;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: #e74c3c;
+        }
+
+        .nav-tab:hover {
+            background: #2c3e50;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .checklist-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e74c3c;
+        }
+
+        .checklist-item {
+            background: #f8f9fa;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            border-color: #e74c3c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.1);
+        }
+
+        .checklist-item.checked {
+            background: #d5f4e6;
+            border-color: #27ae60;
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container {
+            margin-right: 15px;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            appearance: none;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-checkbox:checked {
+            background: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: 4px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .item-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .item-priority {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .priority-high {
+            background: #e74c3c;
+        }
+
+        .priority-medium {
+            background: #f39c12;
+        }
+
+        .priority-low {
+            background: #27ae60;
+        }
+
+        .item-description {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-left: 39px;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 30px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .report-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .report-item {
+            background: white;
+            border-bottom: 1px solid #ecf0f1;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .report-item:hover {
+            background: #f1f2f6;
+        }
+
+        .report-info {
+            flex: 1;
+        }
+
+        .report-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .report-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .status-completed {
+            background: #27ae60;
+        }
+
+        .status-pending {
+            background: #f39c12;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .alert {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .report-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 製造業機器チェックシステム</h1>
+            <div class="subtitle">Daily Equipment Inspection System</div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('checklist')">📋 チェックリスト</button>
+            <button class="nav-tab" onclick="showTab('reports')">📊 報告一覧</button>
+        </div>
+
+        <!-- チェックリストタブ -->
+        <div id="checklist" class="tab-content active">
+            <div class="checklist-section">
+                <h2 class="section-title">🔧 製造機器点検チェックリスト</h2>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar">0% 完了</div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check1" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">プレス機械の動作確認</div>
+                        <div class="item-priority priority-high">高</div>
+                    </div>
+                    <div class="item-description">
+                        プレス機械の上下動作、安全装置、緊急停止ボタンの動作を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check2" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">コンベアベルトの点検</div>
+                        <div class="item-priority priority-medium">中</div>
+                    </div>
+                    <div class="item-description">
+                        ベルトの張り具合、異音の有無、ローラーの回転状態を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check3" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">溶接機の温度管理</div>
+                        <div class="item-priority priority-high">高</div>
+                    </div>
+                    <div class="item-description">
+                        溶接機の設定温度、実際の温度、冷却システムの動作を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check4" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">油圧システムの圧力確認</div>
+                        <div class="item-priority priority-high">高</div>
+                    </div>
+                    <div class="item-description">
+                        油圧ポンプの動作音、圧力ゲージの数値、オイル漏れの有無を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check5" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">切削工具の摩耗チェック</div>
+                        <div class="item-priority priority-medium">中</div>
+                    </div>
+                    <div class="item-description">
+                        切削工具の刃先状態、切り粉の排出状況、工具ホルダーの固定を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check6" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">電気系統の絶縁確認</div>
+                        <div class="item-priority priority-high">高</div>
+                    </div>
+                    <div class="item-description">
+                        配電盤の温度、絶縁抵抗値、接地の確認、ケーブルの損傷チェックを行ってください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check7" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">冷却水系統の点検</div>
+                        <div class="item-priority priority-medium">中</div>
+                    </div>
+                    <div class="item-description">
+                        冷却水の流量、温度、フィルターの汚れ、ポンプの動作状況を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check8" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">安全装置の作動確認</div>
+                        <div class="item-priority priority-high">高</div>
+                    </div>
+                    <div class="item-description">
+                        光電センサー、安全柵、緊急停止スイッチ、警告灯の動作を確認してください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check9" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">潤滑油の補充・交換</div>
+                        <div class="item-priority priority-low">低</div>
+                    </div>
+                    <div class="item-description">
+                        各部の潤滑油レベル、油質の確認、グリースの補充状況をチェックしてください。
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="item-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" id="check10" onchange="updateProgress()">
+                        </div>
+                        <div class="item-title">清掃・整理整頓の実施</div>
+                        <div class="item-priority priority-low">低</div>
+                    </div>
+                    <div class="item-description">
+                        作業エリアの清掃、工具の整理、不要物の除去、床の清拭を実施してください。
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" id="reportBtn" onclick="submitReport()" disabled>
+                        📝 点検報告を提出
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 報告一覧タブ -->
+        <div id="reports" class="tab-content">
+            <div class="checklist-section">
+                <h2 class="section-title">📊 点検報告一覧</h2>
+                
+                <div class="report-list" id="reportList">
+                    <!-- 既存の報告データ（サンプル） -->
+                    <div class="report-item">
+                        <div class="report-info">
+                            <div class="report-title">製造機器点検報告 #001</div>
+                            <div class="report-meta">実施日: 2025-06-04 | 担当者: 田中太郎 | 完了率: 100%</div>
+                        </div>
+                        <div>
+                            <span class="status-badge status-completed">完了</span>
+                            <button class="btn btn-secondary" onclick="viewReportDetails('sample1')">詳細表示</button>
+                        </div>
+                    </div>
+
+                    <div class="report-item">
+                        <div class="report-info">
+                            <div class="report-title">製造機器点検報告 #002</div>
+                            <div class="report-meta">実施日: 2025-06-03 | 担当者: 佐藤花子 | 完了率: 90%</div>
+                        </div>
+                        <div>
+                            <span class="status-badge status-pending">一部未完</span>
+                            <button class="btn btn-secondary" onclick="viewReportDetails('sample2')">詳細表示</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 詳細表示モーダル -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modalTitle">点検報告詳細</h2>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 詳細内容がここに表示されます -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let checklistData = [];
+        
+        // タブ切り替え
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const tabButtons = document.querySelectorAll('.nav-tab');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 進捗更新
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('.custom-checkbox');
+            const checkedCount = document.querySelectorAll('.custom-checkbox:checked').length;
+            const totalCount = checkboxes.length;
+            const percentage = Math.round((checkedCount / totalCount) * 100);
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '% 完了';
+            
+            // チェック済みアイテムのスタイル更新
+            checkboxes.forEach((checkbox, index) => {
+                const item = checkbox.closest('.checklist-item');
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            });
+            
+            // 報告ボタンの有効/無効切り替え
+            const reportBtn = document.getElementById('reportBtn');
+            if (percentage === 100) {
+                reportBtn.disabled = false;
+                reportBtn.textContent = '📝 点検報告を提出';
+            } else {
+                reportBtn.disabled = true;
+                reportBtn.textContent = `📝 点検報告を提出 (${checkedCount}/${totalCount})`;
+            }
+        }
+
+        // 報告提出
+        function submitReport() {
+            const checkboxes = document.querySelectorAll('.custom-checkbox:checked');
+            if (checkboxes.length === 10) {
+                const now = new Date();
+                const reportId = 'RPT-' + now.getTime();
+                const dateStr = now.toLocaleDateString('ja-JP');
+                const timeStr = now.toLocaleTimeString('ja-JP');
+                
+                // 報告データを保存
+                const reportData = {
+                    id: reportId,
+                    date: dateStr,
+                    time: timeStr,
+                    inspector: '現在のユーザー',
+                    completionRate: 100,
+                    status: 'completed',
+                    checklist: Array.from(checkboxes).map((cb, index) => ({
+                        id: cb.id,
+                        title: cb.closest('.checklist-item').querySelector('.item-title').textContent,
+                        checked: true
+                    }))
+                };
+                
+                // LocalStorageに保存
+                let reports = JSON.parse(localStorage.getItem('inspectionReports') || '[]');
+                reports.unshift(reportData);
+                localStorage.setItem('inspectionReports', JSON.stringify(reports));
+                
+                // 成功メッセージ
+                alert('✅ 点検報告が正常に提出されました！\n\n報告ID: ' + reportId + '\n提出日時: ' + dateStr + ' ' + timeStr);
+                
+                // チェックリストをリセット
+                checkboxes.forEach(cb => cb.checked = false);
+                updateProgress();
+                
+                // 報告一覧を更新
+                loadReports();
+            }
+        }
+
+        // 報告一覧の読み込み
+        function loadReports() {
+            const reports = JSON.parse(localStorage.getItem('inspectionReports') || '[]');
+            const reportList = document.getElementById('reportList');
+            
+            // 既存のサンプルデータを保持
+            const sampleReports = reportList.innerHTML;
+            
+            // 新しい報告を追加
+            const newReportsHtml = reports.map(report => `
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-title">製造機器点検報告 ${report.id}</div>
+                        <div class="report-meta">実施日: ${report.date} ${report.time} | 担当者: ${report.inspector} | 完了率: ${report.completionRate}%</div>
+                    </div>
+                    <div>
+                        <span class="status-badge ${report.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                            ${report.status === 'completed' ? '完了' : '一部未完'}
+                        </span>
+                        <button class="btn btn-secondary" onclick="viewReportDetails('${report.id}')">詳細表示</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            reportList.innerHTML = newReportsHtml + sampleReports;
+        }
+
+        // 報告詳細表示
+        function viewReportDetails(reportId) {
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            if (reportId.startsWith('sample')) {
+                // サンプルデータの表示
+                modalTitle.textContent = 'サンプル報告詳細';
+                modalBody.innerHTML = `
+                    <div class="alert">
+                        📋 これはサンプルデータです。実際の点検項目は以下のようになります。
+                    </div>
+                    <h3>点検項目一覧</h3>
+                    <ul style="margin: 20px 0; padding-left: 20px;">
+                        <li>✅ プレス機械の動作確認</li>
+                        <li>✅ コンベアベルトの点検</li>
+                        <li>✅ 溶接機の温度管理</li>
+                        <li>✅ 油圧システムの圧力確認</li>
+                        <li>✅ 切削工具の摩耗チェック</li>
+                        <li>✅ 電気系統の絶縁確認</li>
+                        <li>✅ 冷却水系統の点検</li>
+                        <li>✅ 安全装置の作動確認</li>
+                        <li>✅ 潤滑油の補充・交換</li>
+                        <li>${reportId === 'sample1' ? '✅' : '❌'} 清掃・整理整頓の実施</li>
+                    </ul>
+                `;
+            } else {
+                // 実際の報告データの表示
+                const reports = JSON.parse(localStorage.getItem('inspectionReports') || '[]');
+                const report = reports.find(r => r.id === reportId);
+                
+                if (report) {
+                    modalTitle.textContent = `点検報告詳細 - ${report.id}`;
+                    modalBody.innerHTML = `
+                        <div class="alert">
+                            📅 実施日時: ${report.date} ${report.time}<br>
+                            👤 担当者: ${report.inspector}<br>
+                            📊 完了率: ${report.completionRate}%
+                        </div>
+                        <h3>点検項目一覧</h3>
+                        <ul style="margin: 20px 0; padding-left: 20px;">
+                            ${report.checklist.map(item => `
+                                <li>${item.checked ? '✅' : '❌'} ${item.title}</li>
+                            `).join('')}
+                        </ul>
+                    `;
+                }
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // モーダル閉じる
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // モーダル外クリックで閉じる
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            loadReports();
+        });
+    </script>
+</body>
+</html>
