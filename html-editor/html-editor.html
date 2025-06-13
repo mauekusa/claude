@@ -288,22 +288,52 @@
                         
                         <Box className="tab-content">
                             <TabPanel value={tabValue} index={0}>
-                                <Paper 
+                                <Box
                                     sx={{ 
                                         height: '100%', 
                                         display: 'flex',
-                                        overflow: 'hidden'
+                                        border: '1px solid #ddd',
+                                        borderRadius: 1,
+                                        overflow: 'hidden',
+                                        backgroundColor: 'white'
                                     }}
                                 >
                                     <LineNumbers lines={lineCount} />
-                                    <textarea
-                                        className="html-editor"
+                                    <TextField
+                                        multiline
                                         value={htmlContent}
                                         onChange={handleHtmlChange}
                                         placeholder="HTMLコードをここに入力してください..."
-                                        spellCheck={false}
+                                        variant="outlined"
+                                        fullWidth
+                                        minRows={20}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                fontFamily: '"Courier New", monospace',
+                                                fontSize: '14px',
+                                                lineHeight: 1.5,
+                                                height: '100%',
+                                                '& fieldset': {
+                                                    border: 'none',
+                                                },
+                                                '&:hover fieldset': {
+                                                    border: 'none',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    border: 'none',
+                                                },
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                height: '100% !important',
+                                                overflow: 'auto !important',
+                                            }
+                                        }}
+                                        InputProps={{
+                                            spellCheck: false,
+                                            autoComplete: 'off',
+                                        }}
                                     />
-                                </Paper>
+                                </Box>
                             </TabPanel>
                             
                             <TabPanel value={tabValue} index={1}>
