@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLテンプレート集</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3436;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        .template {
+            background: #f8f9fa;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #00b894;
+        }
+        .template h2 {
+            color: #00b894;
+            margin-bottom: 10px;
+        }
+        .template-code {
+            background: #2d3436;
+            color: #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            background: #e17055;
+            color: white;
+            margin: 5px 0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .demo-section {
+            background: #fd79a8;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 HTMLテンプレート集</h1>
+        <p>HTMLエディターで使用できるサンプルテンプレートです。コピーして自由にカスタマイズしてください。</p>
+
+        <div class="template">
+            <h2>1. 基本的なWebページ</h2>
+            <div class="template-code">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;私のWebページ&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;ようこそ！&lt;/h1&gt;
+    &lt;p&gt;これは私の最初のWebページです。&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+            </div>
+        </div>
+
+        <div class="template">
+            <h2>2. カード型レイアウト</h2>
+            <div class="template-code">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;カードレイアウト&lt;/title&gt;
+    &lt;style&gt;
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="card-grid"&gt;
+        &lt;div class="card"&gt;
+            &lt;h3&gt;カード1&lt;/h3&gt;
+            &lt;p&gt;ここにコンテンツが入ります。&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="card"&gt;
+            &lt;h3&gt;カード2&lt;/h3&gt;
+            &lt;p&gt;ここにコンテンツが入ります。&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+            </div>
+        </div>
+
+        <div class="template">
+            <h2>3. フォーム付きページ</h2>
+            <div class="template-code">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;お問い合わせフォーム&lt;/title&gt;
+    &lt;style&gt;
+        form { max-width: 400px; margin: 0 auto; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: #007bff; color: white; padding: 12px 24px; border: none; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;お問い合わせ&lt;/h1&gt;
+    &lt;form&gt;
+        &lt;input type="text" placeholder="お名前" required&gt;
+        &lt;input type="email" placeholder="メールアドレス" required&gt;
+        &lt;textarea placeholder="メッセージ" rows="5"&gt;&lt;/textarea&gt;
+        &lt;button type="submit"&gt;送信&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🚀 使い方</h2>
+            <p>上記のテンプレートをHTMLエディターにコピーして、プレビューで確認してみましょう！</p>
+        </div>
+
+        <div class="template">
+            <h2>📝 特徴</h2>
+            <ul class="feature-list">
+                <li>レスポンシブ対応</li>
+                <li>モダンCSS</li>
+                <li>実用的なレイアウト</li>
+                <li>カスタマイズ可能</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

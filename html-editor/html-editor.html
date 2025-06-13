@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML エディター & プレビュー</title>
+    
+    <!-- Material-UI CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 80vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .content {
+            height: calc(80vh - 120px);
+        }
+
+        .editor-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .line-numbers {
+            background: #f5f5f5;
+            color: #666;
+            padding: 10px 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: right;
+            border-right: 1px solid #ddd;
+            user-select: none;
+            min-width: 40px;
+        }
+
+        .editor-wrapper {
+            display: flex;
+            height: 100%;
+        }
+
+        .html-editor {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .preview-container {
+            height: 100%;
+            padding: 20px;
+            overflow: auto;
+            background: #fafafa;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .tab-content {
+            height: calc(100% - 48px);
+        }
+
+        .MuiTabs-root {
+            border-bottom: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HTML エディター & プレビュー</h1>
+            <div class="subtitle">タブを切り替えてHTMLの編集とプレビューを行えます</div>
+        </div>
+        
+        <div class="content">
+            <div id="app"></div>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { 
+            Box, 
+            Tabs, 
+            Tab, 
+            TextField, 
+            Typography,
+            Paper,
+            ThemeProvider,
+            createTheme
+        } = MaterialUI;
+
+        const theme = createTheme({
+            palette: {
+                primary: {
+                    main: '#3f51b5',
+                },
+                secondary: {
+                    main: '#f50057',
+                },
+            },
+        });
+
+        function TabPanel({ children, value, index, ...other }) {
+            return (
+                <div
+                    role="tabpanel"
+                    hidden={value !== index}
+                    id={`tabpanel-${index}`}
+                    aria-labelledby={`tab-${index}`}
+                    style={{ height: '100%' }}
+                    {...other}
+                >
+                    {value === index && (
+                        <Box sx={{ height: '100%' }}>
+                            {children}
+                        </Box>
+                    )}
+                </div>
+            );
+        }
+
+        function LineNumbers({ lines }) {
+            return (
+                <div className="line-numbers">
+                    {Array.from({ length: lines }, (_, i) => (
+                        <div key={i + 1}>{i + 1}</div>
+                    ))}
+                </div>
+            );
+        }
+
+        function HTMLEditor() {
+            const [tabValue, setTabValue] = useState(0);
+            const [htmlContent, setHtmlContent] = useState(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サンプルページ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .feature {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HTMLエディターのデモ</h1>
+        <p>このHTMLエディターでは、リアルタイムでHTMLの編集とプレビューができます。</p>
+        
+        <div class="feature">
+            <h3>🎨 機能</h3>
+            <ul>
+                <li>行番号表示</li>
+                <li>タブ切り替え</li>
+                <li>リアルタイムプレビュー</li>
+                <li>Material-UI インターフェース</li>
+            </ul>
+        </div>
+        
+        <div class="feature">
+            <h3>📝 使い方</h3>
+            <p>左上のタブでエディターとプレビューを切り替えられます。</p>
+            <button onclick="alert('ボタンが押されました！')">テストボタン</button>
+        </div>
+        
+        <div class="feature">
+            <h3>💡 ヒント</h3>
+            <p>エディターでHTMLを編集すると、プレビューが自動的に更新されます。</p>
+        </div>
+    </div>
+</body>
+</html>`);
+
+            const handleTabChange = (event, newValue) => {
+                setTabValue(newValue);
+            };
+
+            const handleHtmlChange = (event) => {
+                setHtmlContent(event.target.value);
+            };
+
+            const lineCount = htmlContent.split('\n').length;
+
+            return (
+                <ThemeProvider theme={theme}>
+                    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                        <Tabs 
+                            value={tabValue} 
+                            onChange={handleTabChange}
+                            aria-label="HTML editor tabs"
+                        >
+                            <Tab 
+                                label="HTMLエディター" 
+                                icon={<span className="material-icons">code</span>}
+                                iconPosition="start"
+                            />
+                            <Tab 
+                                label="プレビュー" 
+                                icon={<span className="material-icons">preview</span>}
+                                iconPosition="start"
+                            />
+                        </Tabs>
+                        
+                        <Box className="tab-content">
+                            <TabPanel value={tabValue} index={0}>
+                                <Paper 
+                                    sx={{ 
+                                        height: '100%', 
+                                        display: 'flex',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    <LineNumbers lines={lineCount} />
+                                    <textarea
+                                        className="html-editor"
+                                        value={htmlContent}
+                                        onChange={handleHtmlChange}
+                                        placeholder="HTMLコードをここに入力してください..."
+                                        spellCheck={false}
+                                    />
+                                </Paper>
+                            </TabPanel>
+                            
+                            <TabPanel value={tabValue} index={1}>
+                                <div className="preview-container">
+                                    <iframe
+                                        className="preview-frame"
+                                        srcDoc={htmlContent}
+                                        title="HTML Preview"
+                                        sandbox="allow-scripts allow-same-origin"
+                                    />
+                                </div>
+                            </TabPanel>
+                        </Box>
+                    </Box>
+                </ThemeProvider>
+            );
+        }
+
+        ReactDOM.render(<HTMLEditor />, document.getElementById('app'));
+    </script>
+</body>
+</html>
